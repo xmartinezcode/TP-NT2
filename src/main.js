@@ -2,6 +2,14 @@ import Vue from 'vue'
 import App from './App.vue'
 import * as VueGoogleMaps from "vue2-google-maps"
 import VueRouter from 'vue-router'
+import Datetime from 'vue-datetime'
+import 'vue-datetime/dist/vue-datetime.css'
+import VueResource from 'vue-resource'
+
+Vue.use(VueResource)
+
+ 
+Vue.use(Datetime)
 
 
 

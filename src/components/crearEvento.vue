@@ -14,7 +14,7 @@
 
     <gmap-autocomplete class="form-control"></gmap-autocomplete>
     <label>Fecha</label>
-    <datepicker />
+    <datetime type="datetime" v-model="date"></datetime>
 
     <input type="button" value="Crear" class="btn btn-success" v-on:click="agregarEvento" />
     
@@ -23,12 +23,10 @@
 
 <script>
 
-import Datepicker from 'vuejs-datepicker'
 
 
 export default {
   name: "crearEvento", 
-  components:{Datepicker},
   props: {},
   data: function() {
     return {
