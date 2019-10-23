@@ -19,8 +19,6 @@
           <router-link to="/Login" class="nav-item nav-link" tag="a">Login</router-link>
           <router-link to="/CrearEvento" class="nav-item nav-link" tag="a">Crear Evento</router-link>
           <router-link to="/ListaEventos" class="nav-item nav-link" tag="a">Lista de Eventos</router-link>
-          <router-link to="/BusquedaAvanzada" class="nav-item nav-link" tag="a">BusquedaAvanzada</router-link>
-
         </div>
       </div>
     </nav>
@@ -79,4 +77,5 @@ body {
   color: #2c3e50;
   margin-top: 60px;
 }
+
 </style>
