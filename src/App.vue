@@ -18,6 +18,7 @@
           <router-link to="/" class="nav-item nav-link" tag="a">Home</router-link>
           <router-link to="/Login" class="nav-item nav-link" tag="a">Login</router-link>
           <router-link to="/CrearEvento" class="nav-item nav-link" tag="a">Crear Evento</router-link>
+          <router-link to="/CrearUsuario" class="nav-item nav-link" tag="a">Crear Usuario</router-link>
           <router-link to="/ListaEventos" class="nav-item nav-link" tag="a">Lista de Eventos</router-link>
         </div>
       </div>
