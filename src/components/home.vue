@@ -19,14 +19,33 @@
         </div>
 
         <div class="col-2">
-          <div class="btn-group-vertical">
+          <!-- <div class="btn-group-vertical">
             <button type="button" class="btn btn-info">Magic</button>
             <button type="button" class="btn btn-info">Futbol</button>
             <button type="button" class="btn btn-info">Mateada</button>
             <button type="button" class="btn btn-info">Musica</button>
             <button type="button" class="btn btn-info">Previa</button>
             <router-link to="/BusquedaAvanzada" class="btn btn-info" tag="button">BUSQUEDA AVANZADA</router-link>
+          </div> -->
+
+          <!-- <b-form-group label="Stacked (vertical) button-group style checkboxes"> -->
+          <b-form-group>
+            <b-form-checkbox-group
+              v-model="selected"
+              :options="options"
+              stacked
+              buttons
+              button-variant="btn btn-info" 
+              size="lg"
+              name="buttons-Categoria"
+            ></b-form-checkbox-group>
+          </b-form-group>
+
+          <div class="btn-group-vertical">
+            <router-link to="/BusquedaAvanzada" class="btn btn-info" tag="button">BUSQUEDA AVANZADA</router-link>
           </div>
+
+
         </div>
       </div>
     </div>
@@ -39,6 +58,18 @@
 
 <script>
 export default {
+  data() {
+      return {
+        selected: [], // Must be an array reference!
+        options: [
+          { text: 'Magic', value: 'Magic' },
+          { text: 'Futbol', value: 'Futbol' },
+          { text: 'Mateada', value: 'Mateada' },
+          { text: 'Musica', Musica: 'Musica' },
+          { text: 'Previa', Musica: 'Previa' }
+        ]
+      }
+    }
 };
 </script>
 <style scoped>

@@ -5,9 +5,10 @@ import VueRouter from 'vue-router'
 import Datetime from 'vue-datetime'
 import 'vue-datetime/dist/vue-datetime.css'
 import VueResource from 'vue-resource'
+import BootstrapVue from 'bootstrap-vue'
 
 Vue.use(VueResource)
-
+Vue.use(BootstrapVue)
  
 Vue.use(Datetime)
 
