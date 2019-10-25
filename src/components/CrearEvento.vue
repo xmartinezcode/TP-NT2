@@ -1,10 +1,11 @@
 <template>
   <div class="col-md-6 col-xs-12">
+    
     <h1>Crear Evento</h1>
-    <label>Tipo</label>
-    <img v-bind:src="'img/'+tipo+'.png'" width="50px" height="50px" />
+    <label>categoria</label>
+    <img v-bind:src="'.src/assets/'+categoria+'.png'" width="50px" height="50px" />
 
-    <select class="form-control" v-model="tipo" id="tipo">
+    <select class="form-control" v-model="categoria">
       <option>Partido Futbol</option>
       <option>Cartas Magic</option>
       <option>Mateada en la Plaza</option>
@@ -12,17 +13,20 @@
 
     <label>Direccion</label>
 
-    <gmap-autocomplete class="form-control"></gmap-autocomplete>
+    <gmap-autocomplete @place_changed="setPlace" id="autocomplete" class="form-control"></gmap-autocomplete>
+    {{direccion}}
     <label>Fecha</label>
     <datetime type="datetime" v-model="date"></datetime>
 
     <input type="button" value="Crear" class="btn btn-success" v-on:click="agregarEvento" />
-    
+    {{eventos}}
   </div>
 </template>
 
 <script>
 
+
+var bd = require('./bd.js')
 
 
 export default {
@@ -30,27 +34,22 @@ export default {
   props: {},
   data: function() {
     return {
-      lista: [],
-      tipo: "",
+      eventos:bd.eventos,
+      categoria: "",
       direccion: "",
       latitud: "",
       longitud: "",
-      date:""
+      date:"",
+      currentPlace:null
       
     };
   },
   methods: {
-    agregarEvento: function() {
-      var direccion = this.direccion.value;
-      this.lista.push({
-        tipo: this.tipo,
-        direccion,
-        latitud: this.latitud,
-        longitud: this.longitud
-      });
-      this.tipo = "";
-      this.direccion = "";
-      this.direccion = "";
+    agregarEvento: function() { 
+      bd.eventos.push(this.categoria,this.currentPlace.formatted_address,this.currentPlace.geometry.location,this.date)      
+    },
+    setPlace(place) {
+      this.currentPlace = place;
     }
   }
 };

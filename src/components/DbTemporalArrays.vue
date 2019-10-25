@@ -1,22 +1,23 @@
 <template>
+
+<div class="container">
+    
+</div>
   
 </template>
 
 <script>
 
     export default {
-        name: 'dbTemporalArrays',
+        name: 'DbTemporalArrays',
         components: {
-            litaEventos,
+
         },
         data:function(){
             
             return{
                 arrayListaEventos:[
 
-                    {tipo='futbol',direccion='forest 366'},
-                    {tipo='futbol',direccion='forest 400'},
-                    {tipo='futbol',direccion='forest 500'}
 
                 ]
                     
