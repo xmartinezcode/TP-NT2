@@ -12,40 +12,32 @@
 </template>
 
 <script>
+
+var bd = require('./bd.js')
+
+
 export default {
   name: "GoogleMap",
   data() {
     return {
-      // default to Montreal to keep it simple
-      // change this to whatever makes sense
       center: { lat: -34.59, lng: -58.45 },
       markers: [],
-      places: [],
-      currentPlace: null
     };
   },
 
   mounted() {
     this.geolocate();
+
+     
+     this.markers.push({position:bd.eventos[0].coordenadas});
+     
+  
   },
 
   methods: {
     // receives a place object via the autocomplete component
-    setPlace(place) {
-      this.currentPlace = place;
-    },
-    addMarker() {
-      if (this.currentPlace) {
-        const marker = {
-          lat: this.currentPlace.geometry.location.lat(),
-          lng: this.currentPlace.geometry.location.lng()
-        };
-        this.markers.push({ position: marker });
-        this.places.push(this.currentPlace);
-        this.center = marker;
-        this.currentPlace = null;
-      }
-    },
+    
+    
     geolocate: function() {
       navigator.geolocation.getCurrentPosition(position => {
         this.center = {
@@ -54,7 +46,9 @@ export default {
         };
       });
     }
-  }
+  },
+
+
 };
 </script>
 
