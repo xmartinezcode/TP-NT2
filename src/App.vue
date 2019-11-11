@@ -1,39 +1,47 @@
 <template>
   <div id="app">
-    <div class="container">
-      <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <img class="navbar-brand" src="./assets/logo.png" href="#" />
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-toggle="collapse"
-          data-target="#navbarNavAltMarkup"
-          aria-controls="navbarNavAltMarkup"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-          <div class="navbar-nav ml-auto">
-            <router-link to="/" class="nav-item nav-link" tag="a">Home</router-link>
-            <router-link to="/Login" class="nav-item nav-link" tag="a">Login</router-link>
-            <router-link to="/CrearEvento" class="nav-item nav-link" tag="a">Crear Evento</router-link>
-            <router-link to="/CrearUsuario" class="nav-item nav-link" tag="a">Crear Usuario</router-link>
-            <router-link to="/ListaEventos" class="nav-item nav-link" tag="a">Lista de Eventos</router-link>
-          </div>
-        </div>
-      </nav>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+      <img class="navbar-brand" src="./assets/logo.png" href="#" />
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarNavAltMarkup"
+        aria-controls="navbarNavAltMarkup"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav ml-auto">
+          <router-link to="/" class="nav-item nav-link" tag="a" v-if="!logeado">Iniciar Sesion</router-link>
+          <router-link to="/Login" class="nav-item nav-link" tag="a" v-if="!logeado">Registrate</router-link>
 
-      <router-view></router-view>
-    </div>
+          <router-link to="/HomeApp" class="nav-item nav-link" tag="a" v-if="logeado">Home</router-link>
+          <router-link to="/CrearEvento" class="nav-item nav-link" tag="a" v-if="logeado">Crear Evento</router-link>
+          <router-link to="/ListaEventos" class="nav-item nav-link" tag="a" v-if="logeado">ListaEventos</router-link>
+
+        </div>
+      </div>
+    </nav>
+   <router-view></router-view>
   </div>
 </template>
 
 <script>
 export default {
   name: "app",
-  components: {}
+  components: {},
+  data: function() {
+    return {
+      navbarLogin: true,
+      logeado: true,
+    };
+  },
+
+  methods: {},
+  created() {},
 };
 </script>
 
@@ -42,9 +50,9 @@ body {
   margin: 0;
   width: 100%;
   height: 100vh;
-  font-family: "Exo", sans-serif;
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
   color: #fff;
-  background: linear-gradient(-45deg, #9da6f5, #6341fd);
+  background: rgb(255, 255, 255);
 }
 
 .btn-info {
@@ -54,15 +62,19 @@ body {
 }
 
 .bg-light {
-  background-color: #ecebeb94 !important;
+  background-color: #6200ff94 !important;
 }
+nav {
+  border-bottom: black;
+}
+
 .nav a {
   color: #7c7493;
 }
 #navbarNavAltMarkup {
   font-size: 22px;
 }
-.container img {
+.navbar img {
   width: 17%;
   height: auto;
 }

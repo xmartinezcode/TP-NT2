@@ -5,6 +5,7 @@
         :key="index"
         v-for="(m, index) in markers"
         :position="m.position"
+        :icon="{ url: `/img/${m.categoria}icon.png`}"
         @click="center=m.position"
       ></gmap-marker>
     </gmap-map>
@@ -29,7 +30,12 @@ export default {
     this.geolocate();
 
      
-     this.markers.push({position:bd.eventos[0].coordenadas});
+     this.markers.push(
+       {position:{ "lat": -34.5876635, "lng": -58.45189970000001 },categoria:'Partido Futbol'},
+       {position:{ "lat": -34.6078662, "lng": -58.3831004 },categoria:'Mateada en la PLaza'},
+       {position:{ "lat": -34.6061884, "lng": -58.4022407 },categoria:'Partido Futbol'},
+       {position:{ "lat": -34.6149214, "lng": -58.4180765 },categoria:'Cartas Magic'}
+       )
      
   
   },

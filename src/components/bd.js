@@ -4,8 +4,11 @@ let eventos=[{ "categoria": "Partido Futbol", "coordenadas": { "lat": -34.587663
     
 ];
 
+let usuarios=[{"nombre":"Xavier","apellido":"Martinez","email":"xavrmartinez@gmail.com","password":"xavier12"}];
+
+let usuarioLogeado={"nombre":"Xavier","apellido":"Martinez","email":"xavrmartinez@gmail.com","password":"xavier12"};
 
 module.exports = {
     
-    eventos
+    eventos,usuarios,usuarioLogeado
 }

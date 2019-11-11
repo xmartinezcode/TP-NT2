@@ -6,6 +6,13 @@ import Datetime from 'vue-datetime'
 import 'vue-datetime/dist/vue-datetime.css'
 import VueResource from 'vue-resource'
 import BootstrapVue from 'bootstrap-vue'
+import Axios from 'axios'
+
+Vue.prototype.$http = Axios;
+const token = localStorage.getItem('token')
+if (token) {
+  Vue.prototype.$http.defaults.headers.common['Authorization'] = token
+}
 
 Vue.use(VueResource)
 Vue.use(BootstrapVue)
@@ -17,7 +24,7 @@ Vue.use(Datetime)
 
 Vue.use(VueGoogleMaps, {
   load: {
-    key: "AIzaSyBhpgWurgQ_iwcZKqXCnD6x6Zma6ooi5Xw",
+    key: "AIzaSyBGQSt703j5v4FOLnFANwgjKC-J32jOTgU",
     libraries: "places" // necessary for places input
   }
 });

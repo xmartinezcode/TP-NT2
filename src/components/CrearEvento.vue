@@ -1,19 +1,21 @@
 <template>
 
-  <div class="col-md-6 col-xs-12">
+  <div class="container">
     <h1>Crear Evento</h1>
-
+    <form>
     <div class="form-group">
+      
+      
+      <img :src="`/img/${categoria}icon.png`" width="50px" height="50px">
+      <br>
       <label>Categoria</label>
-      <img v-bind:src="'./assets/'+categoria+'.png'" width="50px" height="50px" />
       <select class="form-control" v-model="categoria">
-        <option disabled selected>Selecciona una categoria</option>
         <option>Partido Futbol</option>
         <option>Cartas Magic</option>
         <option>Mateada en la Plaza</option>
       </select>
     </div>
-
+    
     <div class="form-group">
       <label>Descripción</label>
       <textarea
@@ -40,41 +42,46 @@
     </div>
 
     <input type="button" value="Crear" class="btn btn-success" v-on:click="agregarEvento" />
-  
+  </form>
+  <div v-if="busquedaAvanzada">ACA VA LA BUSQUEDA AVANZADA</div>
   </div>
+  
 </template>
 
 <script>
-var bd = require("./bd.js");
+
 
 export default {
   name: "crearEvento",
   props: {},
   data: function() {
     return {
-      eventos: bd.eventos,
-      categoria: "Selecciona una categoria",
+      categoria: '',
       descripcion: "",
       direccion: "",
       latitud: "",
       longitud: "",
       date: "",
-      currentPlace: null
+      currentPlace: null,
+      busquedaAvanzada:false,
     };
   },
   methods: {
     agregarEvento: function() {
       //bd.eventos.push(this.categoria,this.currentPlace.formatted_address,this.currentPlace.geometry.location,this.date)
-      bd.eventos.push({
+      let eventoCreado={
         categoria: this.categoria,
         direccion: this.currentPlace.formatted_adress,
         coordenadas: this.currentPlace.geometry.location,
-        fecha: this.date
-      });
-    },
+        fecha: this.date,
+        descripcion: this.descripcion
+      };
+      },
     setPlace(place) {
       this.currentPlace = place;
-    }
+    },
+
+
   }
 };
 </script>
