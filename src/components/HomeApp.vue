@@ -6,9 +6,15 @@
         <div class="row">
           <div class="col-4">
             <button type="button" class="btn btn-info" id="live">Live</button>
-            <button type="button" class="btn btn-info">Hoy</button>
-            <button type="button" class="btn btn-info">1 Semana</button>
-            <button type="button" class="btn btn-info">1 Mes</button>
+            <b-form-radio-group
+              v-model="selectedFecha"
+              :options="optionsFecha"
+              buttons
+              button-variant="btn btn-info"
+              size="lg"
+              name="buttons-Categoria"
+            ></b-form-radio-group>
+            {{selectedFecha}}
           </div>
         </div>
       </div>
@@ -27,7 +33,6 @@
         </div>
 
         <div class="col-2">
-
           <b-form-group>
             <b-form-checkbox-group
               v-model="selected"
@@ -41,60 +46,83 @@
           </b-form-group>
           {{selected}}
           <div class="btn-group-vertical avanzada">
-            <button class="btn btn-info avanzada" @click="busquedaAvanzadaMethod">BUSQUEDA AVANZADA</button>
+            <b-button class="btn btn-info avanzada" @click="show">BUSQUEDA AVANZADA</b-button>
           </div>
         </div>
       </div>
+      <modal name="hello-world">
+        <div class="container">
+        <h3>Busqueda Avanzada por Fecha</h3>
+        <div class="form-group">
+          <label>Desde</label>
+          <datetime placeholder="Selecciona una fecha" type="datetime" v-model="dateDesde"></datetime>
+        </div>
+        <div class="form-group">
+          <label>Hasta</label>
+          <datetime placeholder="Selecciona una fecha" type="datetime" v-model="dateHasta"></datetime>
+            <br>
+            <b-button class="btn btn-info avanzada" @click="buscarPorFechas">BUSQUEDA AVANZADA</b-button>
+        </div>
+      </div>
+      </modal>
     </div>
-    <div v-if="busquedaAvanzada">ACA VA LA BUSQUEDA AVANZADA</div>
   </div>
 </template>
 
 
 <script>
-
 export default {
   data() {
     return {
+      test: this.cuantoDiasFaltan("2019-11-11T10:20:30Z"),
       selected: [],
+      selectedFecha: 30,
       busquedaAvanzada: false,
       center: { lat: -34.59, lng: -58.45 },
       markers: [],
       options: [
         { text: "Magic", value: "Cartas Magic" },
         { text: "Futbol", value: "Partido Futbol" },
-        { text: "Mateada", value: "Mateada en la Plaza" },
-        { text: "Musica", Musica: "Musica" },
-        { text: "Previa", Musica: "Previa" }
+        { text: "Mateada", value: "Mateada en la Plaza" }
       ],
-      todosLosEventos:[{
-        position: { lat: -34.5876635, lng: -58.45189970000001 },
-        categoria: "Partido Futbol"
-      },
-      {
-        position: { lat: -34.6078662, lng: -58.3831004 },
-        categoria: "Mateada en la Plaza"
-      },
-      {
-        position: { lat: -34.6061884, lng: -58.4022407 },
-        categoria: "Partido Futbol"
-      },
-      {
-        position: { lat: -34.6149214, lng: -58.4180765 },
-        categoria: "Cartas Magic"
-      }]
+      optionsFecha: [
+        { text: "Hoy", value: "1" },
+        { text: "1 Semana", value: "7" },
+        { text: "1 Mes", value: "30" }
+      ],
+      todosLosEventos: [
+        {
+          position: { lat: -34.5876635, lng: -58.45189970000001 },
+          categoria: "Partido Futbol",
+          fechaHora: "2019-11-11T10:20:30Z"
+        },
+        {
+          position: { lat: -34.6078662, lng: -58.3831004 },
+          categoria: "Mateada en la Plaza",
+          fechaHora: "2019-11-23T10:20:30Z"
+        },
+        {
+          position: { lat: -34.6061884, lng: -58.4022407 },
+          categoria: "Partido Futbol",
+          fechaHora: "2019-11-14T10:20:30Z"
+        },
+        {
+          position: { lat: -34.6149214, lng: -58.4180765 },
+          categoria: "Cartas Magic",
+          fechaHora: "2019-11-29T10:20:30Z"
+        }
+      ],
+      dateDesde:'',
+      dateHasta:''
     };
   },
   mounted() {
-
     this.geolocate();
 
-    this.markers=this.todosLosEventos
+    this.markers = this.todosLosEventos;
   },
   methods: {
-    busquedaAvanzadaMethod: function() {
-      this.busquedaAvanzada = true;
-    },
+    busquedaAvanzadaMethod: function() {},
     geolocate: function() {
       navigator.geolocation.getCurrentPosition(position => {
         this.center = {
@@ -103,42 +131,88 @@ export default {
         };
       });
     },
-   
-    actualizarMarkers(Array){
-      let listaFiltrada=[];
-      
-      let i=0;
-      let j=0;
-      console.log(this.todosLosEventos.length)
-      while(i<this.todosLosEventos.length){
 
-        while(j<Array.length){
+    actualizarMarkersPorCategoria(ArraysCategorias) {
+      let listaFiltrada = [];
 
-          if(this.todosLosEventos[i].categoria==Array[j]){
-            listaFiltrada.push(this.todosLosEventos[i])
+      let i = 0;
+      let j = 0;
+      console.log(this.markers.length);
+
+      if (ArraysCategorias.length != 0) {
+        while (i < this.markers.length) {
+          while (j < ArraysCategorias.length) {
+            if (this.markers[i].categoria == ArraysCategorias[j]) {
+              listaFiltrada.push(this.markers[i]);
+            }
+
+            j++;
           }
-          
-          j++
+          j = 0;
+          i++;
         }
-        j=0
-        i++
       }
-
-
-      return listaFiltrada
-    }
-  },
-  watch:{
-
-    selected: function (val) {
-      if(val.length!=0){
-        this.markers=this.actualizarMarkers(val)
-      }else{
-        this.markers=this.todosLosEventos
-      }
-      
+      return listaFiltrada;
     },
 
+    actualizarMarkersPorFecha(fecha) {
+      let i = 0;
+      let lista = [];
+      while (i < this.todosLosEventos.length) {
+        if (this.cuantoDiasFaltan(this.todosLosEventos[i].fechaHora) <= fecha) {
+          lista.push(this.todosLosEventos[i]);
+        }
+        i++;
+      }
+      console.log(lista);
+      return lista;
+    },
+
+    cuantoDiasFaltan(fechaString) {
+      let hoy = new Date();
+      let fechaDate = new Date(fechaString);
+      if (hoy.getMonth() == 11 && hoy.getDate() > 25) {
+        fechaDate.setFullYear(fechaDate.getFullYear() + 1);
+      }
+      let one_day = 1000 * 60 * 60 * 24;
+
+      return Math.ceil((fechaDate.getTime() - hoy.getTime()) / one_day);
+    },
+    show() {
+      this.$modal.show("hello-world");
+    },
+    hide() {
+      this.$modal.hide("hello-world");
+    },
+    buscarPorFechas(){/*
+      axios
+      .get('http://localhost:8080/api/eventos')
+      .then(response => (console.log(response)))*/
+      let i=0
+      let busquedaDesde=new Date(this.dateDesde)
+      let busquedaHasta=new Date(this.dateHasta)
+      let lista = []
+      while(i<this.todosLosEventos.length){
+        let fechaEvento=new Date(this.todosLosEventos[i].fechaHora)
+        if(fechaEvento>busquedaDesde && fechaEvento<busquedaHasta){
+          lista.push(this.todosLosEventos[i])
+        }
+        i++
+      }
+      this.markers=lista;
+      this.hide()
+    }
+  },
+
+  watch: {
+    selected: function(val) {
+      this.markers = this.actualizarMarkersPorFecha(this.selectedFecha);
+      this.markers = this.actualizarMarkersPorCategoria(val);
+    },
+    selectedFecha: function(val) {
+      this.markers = this.actualizarMarkersPorFecha(val);
+      this.markers = this.actualizarMarkersPorCategoria(this.selected);
+    }
   }
 };
 </script>

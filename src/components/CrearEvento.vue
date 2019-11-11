@@ -43,7 +43,7 @@
 
     <input type="button" value="Crear" class="btn btn-success" v-on:click="agregarEvento" />
   </form>
-  <div v-if="busquedaAvanzada">ACA VA LA BUSQUEDA AVANZADA</div>
+  
   </div>
   
 </template>
@@ -63,7 +63,7 @@ export default {
       longitud: "",
       date: "",
       currentPlace: null,
-      busquedaAvanzada:false,
+  
     };
   },
   methods: {
