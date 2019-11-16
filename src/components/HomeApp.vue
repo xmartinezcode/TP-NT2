@@ -4,8 +4,9 @@
       <br />
       <div class="btn-space">
         <div class="row">
-          <div class="col-4">
+          <div class="col-6">
             <button type="button" class="btn btn-info" id="live">Live</button>
+
             <b-form-radio-group
               v-model="selectedFecha"
               :options="optionsFecha"
@@ -13,6 +14,7 @@
               button-variant="btn btn-info"
               size="lg"
               name="buttons-Categoria"
+              id="botoneraFechas"
             ></b-form-radio-group>
             {{selectedFecha}}
           </div>
@@ -24,8 +26,8 @@
           <gmap-map :center="center" :zoom="13" style="width:100%;  height: 350px;">
             <gmap-marker
               :key="index"
-              v-for="(m, index) in markers"
-              :position="m.position"
+              v-for="(m, index) in filtrarMarcadores"
+              :position="{lat:m.latitud, lng:m.longitud}"
               :icon="{ url: `/img/${m.categoria}icon.png`}"
               @click="center=m.position"
             ></gmap-marker>
@@ -35,16 +37,16 @@
         <div class="col-2">
           <b-form-group>
             <b-form-checkbox-group
-              v-model="selected"
+              v-model="selectedCategoria"
               :options="options"
               stacked
               buttons
-              button-variant="btn btn-info"
+              button-variant="btn btn-info ml-4"
               size="lg"
               name="buttons-Categoria"
             ></b-form-checkbox-group>
           </b-form-group>
-          {{selected}}
+
           <div class="btn-group-vertical avanzada">
             <b-button class="btn btn-info avanzada" @click="show">BUSQUEDA AVANZADA</b-button>
           </div>
@@ -52,31 +54,34 @@
       </div>
       <modal name="hello-world">
         <div class="container">
-        <h3>Busqueda Avanzada por Fecha</h3>
-        <div class="form-group">
-          <label>Desde</label>
-          <datetime placeholder="Selecciona una fecha" type="datetime" v-model="dateDesde"></datetime>
-        </div>
-        <div class="form-group">
-          <label>Hasta</label>
-          <datetime placeholder="Selecciona una fecha" type="datetime" v-model="dateHasta"></datetime>
-            <br>
+          <h3>Busqueda Avanzada por Fecha</h3>
+          <div class="form-group">
+            <label>Desde</label>
+            <datetime placeholder="Selecciona una fecha" type="datetime" v-model="dateDesde"></datetime>
+          </div>
+          <div class="form-group">
+            <label>Hasta</label>
+            <datetime placeholder="Selecciona una fecha" type="datetime" v-model="dateHasta"></datetime>
+            <br />
             <b-button class="btn btn-info avanzada" @click="buscarPorFechas">BUSQUEDA AVANZADA</b-button>
+          </div>
         </div>
-      </div>
       </modal>
     </div>
+    <b-table striped hover :items="markers"></b-table>
   </div>
 </template>
 
 
 <script>
+import axios from "axios"
+
 export default {
   data() {
     return {
       test: this.cuantoDiasFaltan("2019-11-11T10:20:30Z"),
-      selected: [],
-      selectedFecha: 30,
+      selectedCategoria: [],
+      selectedFecha: [],
       busquedaAvanzada: false,
       center: { lat: -34.59, lng: -58.45 },
       markers: [],
@@ -88,30 +93,10 @@ export default {
       optionsFecha: [
         { text: "Hoy", value: "1" },
         { text: "1 Semana", value: "7" },
-        { text: "1 Mes", value: "30" }
+        { text: "1 Mes", value: "30" },
+        { text: "Todos", value: "99999" }
       ],
-      todosLosEventos: [
-        {
-          position: { lat: -34.5876635, lng: -58.45189970000001 },
-          categoria: "Partido Futbol",
-          fechaHora: "2019-11-11T10:20:30Z"
-        },
-        {
-          position: { lat: -34.6078662, lng: -58.3831004 },
-          categoria: "Mateada en la Plaza",
-          fechaHora: "2019-11-23T10:20:30Z"
-        },
-        {
-          position: { lat: -34.6061884, lng: -58.4022407 },
-          categoria: "Partido Futbol",
-          fechaHora: "2019-11-14T10:20:30Z"
-        },
-        {
-          position: { lat: -34.6149214, lng: -58.4180765 },
-          categoria: "Cartas Magic",
-          fechaHora: "2019-11-29T10:20:30Z"
-        }
-      ],
+      todosLosEventos: null,
       dateDesde:'',
       dateHasta:''
     };
@@ -119,8 +104,24 @@ export default {
   mounted() {
     this.geolocate();
 
-    this.markers = this.todosLosEventos;
-  },
+    axios
+        .get("http://localhost:8080/api/eventos")
+        .then(response => {
+          console.log([
+        {
+          position: { lat: -34.5876635, lng: -58.45189970000001 },
+          categoria: "Partido Futbol",
+          fechaHora: "2019-11-11T10:20:30Z"
+        }
+      ])
+          console.log(response.data)
+          this.todosLosEventos = response.data;
+        })
+        .catch(e => {
+          // Podemos mostrar los errores en la consola
+          console.log(e);
+        });
+    },
   methods: {
     busquedaAvanzadaMethod: function() {},
     geolocate: function() {
@@ -151,6 +152,8 @@ export default {
           j = 0;
           i++;
         }
+      }else{
+        listaFiltrada=this.markers
       }
       return listaFiltrada;
     },
@@ -158,11 +161,16 @@ export default {
     actualizarMarkersPorFecha(fecha) {
       let i = 0;
       let lista = [];
-      while (i < this.todosLosEventos.length) {
-        if (this.cuantoDiasFaltan(this.todosLosEventos[i].fechaHora) <= fecha) {
-          lista.push(this.todosLosEventos[i]);
+      if(this.selectedFecha.length!=0){
+
+        while (i < this.todosLosEventos.length) {
+          if (this.cuantoDiasFaltan(this.todosLosEventos[i].fechaHora) <= fecha) {
+            lista.push(this.todosLosEventos[i]);
+          }
+          i++;
         }
-        i++;
+      }else{
+        lista=this.todosLosEventos
       }
       console.log(lista);
       return lista;
@@ -184,10 +192,7 @@ export default {
     hide() {
       this.$modal.hide("hello-world");
     },
-    buscarPorFechas(){/*
-      axios
-      .get('http://localhost:8080/api/eventos')
-      .then(response => (console.log(response)))*/
+    buscarPorFechas(){
       let i=0
       let busquedaDesde=new Date(this.dateDesde)
       let busquedaHasta=new Date(this.dateHasta)
@@ -204,6 +209,27 @@ export default {
     }
   },
 
+  computed:{
+    filtrarMarcadores: function(){
+      //Digo que filtrados es igual a todos los eventos
+      let filtrados = this.todosLosEventos
+
+      //Chequeo si algun boton de arriba esta seleccionado, Filtro por fecha
+       if (this.selectedFecha.length!=0) {
+        filtrados = filtrados.filter(
+          m => this.cuantoDiasFaltan(m.fechaHora) <= this.selectedFecha
+        );
+      }
+      //Chequeo si hay alguna categoria selecciona, Filtro por categoria
+      if(this.selectedCategoria.length!=0){
+        filtrados=filtrados.filter(
+          m=>this.selectedCategoria.indexOf(m.categoria) >=0
+        );
+      }
+      return filtrados
+    }
+  }
+/*
   watch: {
     selected: function(val) {
       this.markers = this.actualizarMarkersPorFecha(this.selectedFecha);
@@ -213,12 +239,10 @@ export default {
       this.markers = this.actualizarMarkersPorFecha(val);
       this.markers = this.actualizarMarkersPorCategoria(this.selected);
     }
-  }
+  }*/
 };
 </script>
 <style scoped>
-.avanzada {
-}
 .btn-space button {
   margin-right: 10px;
 }

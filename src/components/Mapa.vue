@@ -14,7 +14,6 @@
 
 <script>
 
-var bd = require('./bd.js')
 
 
 export default {

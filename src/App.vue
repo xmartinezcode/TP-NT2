@@ -20,7 +20,7 @@
 
           <router-link to="/HomeApp" class="nav-item nav-link" tag="a" v-if="logeado">Home</router-link>
           <router-link to="/CrearEvento" class="nav-item nav-link" tag="a" v-if="logeado">Crear Evento</router-link>
-          <router-link to="/ListaEventos" class="nav-item nav-link" tag="a" v-if="logeado">ListaEventos</router-link>
+          <router-link to="/ListaEventos" class="nav-item nav-link" tag="a" v-if="logeado">Lista de Eventos</router-link>
 
         </div>
       </div>
