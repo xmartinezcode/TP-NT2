@@ -7,9 +7,9 @@ import 'vue-datetime/dist/vue-datetime.css'
 import VueResource from 'vue-resource'
 import BootstrapVue from 'bootstrap-vue'
 import VModal from 'vue-js-modal'
+import Axios from 'axios'
 
-
-
+Vue.prototype.$http = Axios;
 Vue.use(VModal)
 Vue.use(VueResource)
 Vue.use(BootstrapVue)

@@ -37,12 +37,11 @@
 </template>
 
 <script>
-import axios from "axios"
 
 export default {
   data: function() {
     return {
-      dni: 0,
+      dni: null,
       telefono: "",
       email: "",
       password: "",
@@ -54,7 +53,7 @@ export default {
       
       
 
-       axios
+       this.$http
         .post("http://localhost:8080/api/usuarios", {
 
         dni: this.dni,
@@ -62,11 +61,14 @@ export default {
         telefono: this.telefono,
         password: this.password
 
-        }).then(response => {
-            // Respuesta del servidor
         }).catch(e => {
             console.log(e);
         });
+
+        this.dni=null,
+        this.mail="",
+        this.telefono="",
+        this.password=""
     
     }
   }

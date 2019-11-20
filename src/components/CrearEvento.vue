@@ -35,7 +35,6 @@
       <div class="form-group">
         <label>Direccion</label>
         <gmap-autocomplete class="form-control my-0 py-1" @place_changed="setPlace"></gmap-autocomplete>
-        {{currentPlace}}
       </div>
 
       <div class="form-group">
@@ -63,7 +62,7 @@
 </template>
 
 <script>
-import axios from "axios"
+
 export default {
   name: "crearEvento",
   props: {},
@@ -83,22 +82,8 @@ export default {
   methods: {
     agregarEvento: function() {
       //bd.eventos.push(this.categoria,this.currentPlace.formatted_address,this.currentPlace.geometry.location,this.date)
-      let eventoCreado = {
-        titulo: this.titulo,
-        descripcion: this.descripcion,
-        fecha: this.fecha,
-        direccion: this.currentPlace.name,
-        latitud: this.currentPlace.geometry.location.lat(),
-        longitud: this.currentPlace.geometry.location.lng(),
-        cantMax: this.cantMax,
-        categoria: this.categoria,
-        dniCreador: Math.floor(Math.random() * (4000 - 50) + 50),
-        duracion: 24,
-        privado: this.privado
-      };
-      console.log(eventoCreado);
-
-      axios
+   
+      this.$http
         .post("http://localhost:8080/api/eventos", {
         titulo: this.titulo,
         descripcion: this.descripcion,
@@ -111,11 +96,20 @@ export default {
         dniCreador: Math.floor(Math.random() * (4000 - 50) + 50),
         duracion: 24,
         privado: this.privado
-        }).then(response => {
-            // Respuesta del servidor
         }).catch(e => {
             console.log(e);
         });
+
+      this.titulo= "",
+      this.descripcion= "",
+      this.fecha= "",
+      this.cantMax= 0,
+      this.categoria= "",
+      this.currentPlace.name="",
+      this.dniCreador= "",
+      this.duracion= "",
+      this.privado= false,
+      this.currentPlace= null
     },
     setPlace(place) {
       this.currentPlace = place;

@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="container">
-      <br>
+      <br />
       <div class="btn-space">
         <div class="row">
           <div class="col-6" v-if="!busquedaAvanzada">
@@ -16,21 +16,21 @@
             ></b-form-radio-group>
           </div>
 
-          <div v-else>
-            <div class="form-group">
-              <label>Desde</label>
-              <datetime placeholder="Selecciona una fecha" type="datetime" v-model="dateDesde"></datetime>
+          <form v-else>
+            <div class="form-row">
+              <div class="col">
+                <datetime placeholder="Desde" type="datetime" v-model="dateDesde"></datetime>
+              </div>
+              <div class="col">
+                <datetime placeholder="Hasta" type="datetime" v-model="dateHasta"></datetime>
+              </div>
             </div>
-            <div class="form-group">
-              <label>Hasta</label>
-              <datetime placeholder="Selecciona una fecha" type="datetime" v-model="dateHasta"></datetime>
-              <br>
-            </div>
-          </div>
+          </form>
+
           <b-button class="btn btn-info avanzada" @click="busquedaAvanzadaMethod">{{textoAvanzada}}</b-button>
         </div>
       </div>
-      <br>
+      <br />
       <div class="row">
         <div class="col-10">
           <gmap-map :center="center" :zoom="13" style="width:100%;  height: 350px;">
@@ -65,8 +65,6 @@
 
 
 <script>
-import axios from "axios";
-
 export default {
   data() {
     return {
@@ -96,17 +94,9 @@ export default {
   mounted() {
     this.geolocate();
 
-    axios
+    this.$http
       .get("http://localhost:8080/api/eventos")
       .then(response => {
-        console.log([
-          {
-            position: { lat: -34.5876635, lng: -58.45189970000001 },
-            categoria: "Partido Futbol",
-            fechaHora: "2019-11-11T10:20:30Z"
-          }
-        ]);
-        console.log(response.data);
         this.todosLosEventos = response.data;
       })
       .catch(e => {
@@ -117,6 +107,8 @@ export default {
   methods: {
     busquedaAvanzadaMethod: function() {
       if (this.busquedaAvanzada) {
+        this.dateDesde="",
+        this.dateHasta="",
         this.busquedaAvanzada = false;
         this.textoAvanzada = "BUSQUEDA AVANZADA";
       } else {
@@ -133,48 +125,12 @@ export default {
       });
     },
 
-    actualizarMarkersPorCategoria(ArraysCategorias) {
-      let listaFiltrada = [];
+    formatearFecha(fecha){
 
-      let i = 0;
-      let j = 0;
-      console.log(this.markers.length);
+      let fechaFormateada=fecha.replace('Z',' ');
+      fechaFormateada=fechaFormateada.replace('T',' ');
 
-      if (ArraysCategorias.length != 0) {
-        while (i < this.markers.length) {
-          while (j < ArraysCategorias.length) {
-            if (this.markers[i].categoria == ArraysCategorias[j]) {
-              listaFiltrada.push(this.markers[i]);
-            }
-
-            j++;
-          }
-          j = 0;
-          i++;
-        }
-      } else {
-        listaFiltrada = this.markers;
-      }
-      return listaFiltrada;
-    },
-
-    actualizarMarkersPorFecha(fecha) {
-      let i = 0;
-      let lista = [];
-      if (this.selectedFecha.length != 0) {
-        while (i < this.todosLosEventos.length) {
-          if (
-            this.cuantoDiasFaltan(this.todosLosEventos[i].fechaHora) <= fecha
-          ) {
-            lista.push(this.todosLosEventos[i]);
-          }
-          i++;
-        }
-      } else {
-        lista = this.todosLosEventos;
-      }
-      console.log(lista);
-      return lista;
+      return fechaFormateada
     },
 
     cuantoDiasFaltan(fechaString) {
@@ -186,27 +142,6 @@ export default {
       let one_day = 1000 * 60 * 60 * 24;
 
       return Math.ceil((fechaDate.getTime() - hoy.getTime()) / one_day);
-    },
-    show() {
-      this.$modal.show("hello-world");
-    },
-    hide() {
-      this.$modal.hide("hello-world");
-    },
-    buscarPorFechas() {
-      let i = 0;
-      let busquedaDesde = new Date(this.dateDesde);
-      let busquedaHasta = new Date(this.dateHasta);
-      let lista = [];
-      while (i < this.todosLosEventos.length) {
-        let fechaEvento = new Date(this.todosLosEventos[i].fechaHora);
-        if (fechaEvento > busquedaDesde && fechaEvento < busquedaHasta) {
-          lista.push(this.todosLosEventos[i]);
-        }
-        i++;
-      }
-      this.markers = lista;
-      this.hide();
     }
   },
 
@@ -218,7 +153,7 @@ export default {
       //Chequeo si algun boton de arriba esta seleccionado, Filtro por fecha
       if (this.selectedFecha.length != 0) {
         filtrados = filtrados.filter(
-          m => this.cuantoDiasFaltan(m.fechaHora) <= this.selectedFecha
+          m => this.cuantoDiasFaltan(m.fecha) <= this.selectedFecha
         );
       }
       //Chequeo si hay alguna categoria selecciona, Filtro por categoria
@@ -227,20 +162,33 @@ export default {
           m => this.selectedCategoria.indexOf(m.categoria) >= 0
         );
       }
-      return filtrados;
+
+      //Chequeo si esta activada la busqueda avanzada y cancelo todos los filtros anteriores
+
+      if (this.dateDesde != "" && this.dateHasta != "") {
+        this.$http
+          .get("http://localhost:8080/api/eventos", {
+            params: {
+              desde: this.formatearFecha(this.dateDesde),
+              hasta: this.formatearFecha(this.dateHasta)
+            } 
+          })
+          .then(response => {
+            
+            console.log(response.data)
+            filtrados=[]
+            filtrados=response.data
+          })
+          .catch(e => {
+            console.log(this.formatearFecha(this.dateDesde),this.formatearFecha(this.dateHasta))
+            // Podemos mostrar los errores en la consola
+            console.log(e);
+          });
+      }
+      console.log(filtrados)
+      return filtrados
     }
   }
-  /*
-  watch: {
-    selected: function(val) {
-      this.markers = this.actualizarMarkersPorFecha(this.selectedFecha);
-      this.markers = this.actualizarMarkersPorCategoria(val);
-    },
-    selectedFecha: function(val) {
-      this.markers = this.actualizarMarkersPorFecha(val);
-      this.markers = this.actualizarMarkersPorCategoria(this.selected);
-    }
-  }*/
 };
 </script>
 <style scoped>
@@ -250,6 +198,9 @@ export default {
 
 .btn-group-vertical button {
   margin-bottom: 10px;
+}
+
+.btn-avanzada {
 }
 
 #live {
