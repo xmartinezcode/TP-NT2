@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
-      <img class="navbar-brand" src="./assets/logo.png" href="#" />
+      <img class="navbar-brand" src="./assets/logo.png" href="#">
       <button
         class="navbar-toggler"
         type="button"
@@ -15,17 +15,27 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav ml-auto">
-          <router-link to="/" class="nav-item nav-link" tag="a" v-if="!logeado">Iniciar Sesion</router-link>
-          <router-link to="/Login" class="nav-item nav-link" tag="a" v-if="!logeado">Registrate</router-link>
-
           <router-link to="/HomeApp" class="nav-item nav-link" tag="a" v-if="logeado">Home</router-link>
-          <router-link to="/CrearEvento" class="nav-item nav-link" tag="a" v-if="logeado">Crear Evento</router-link>
-          <router-link to="/ListaEventos" class="nav-item nav-link" tag="a" v-if="logeado">Lista de Eventos</router-link>
 
+          <router-link to="/Register" class="nav-item nav-link" tag="a" v-if="logeado">Registrate</router-link>
+          <router-link to="/" class="nav-item nav-link" tag="a" v-if="!logeado">Iniciar Sesion</router-link>
+
+          <router-link
+            to="/CrearEvento"
+            class="nav-item nav-link"
+            tag="a"
+            v-if="logeado"
+          >Crear Evento</router-link>
+          <router-link
+            to="/ListaEventos"
+            class="nav-item nav-link"
+            tag="a"
+            v-if="logeado"
+          >Lista de Eventos</router-link>
         </div>
       </div>
     </nav>
-   <router-view></router-view>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -36,12 +46,12 @@ export default {
   data: function() {
     return {
       navbarLogin: true,
-      logeado: true,
+      logeado: true
     };
   },
 
   methods: {},
-  created() {},
+  created() {}
 };
 </script>
 

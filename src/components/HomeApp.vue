@@ -1,12 +1,10 @@
 <template>
   <div>
     <div class="container">
-      <br />
+      <br>
       <div class="btn-space">
         <div class="row">
-          <div class="col-6">
-            <button type="button" class="btn btn-info" id="live">Live</button>
-
+          <div class="col-6" v-if="!busquedaAvanzada">
             <b-form-radio-group
               v-model="selectedFecha"
               :options="optionsFecha"
@@ -16,11 +14,23 @@
               name="buttons-Categoria"
               id="botoneraFechas"
             ></b-form-radio-group>
-            {{selectedFecha}}
           </div>
+
+          <div v-else>
+            <div class="form-group">
+              <label>Desde</label>
+              <datetime placeholder="Selecciona una fecha" type="datetime" v-model="dateDesde"></datetime>
+            </div>
+            <div class="form-group">
+              <label>Hasta</label>
+              <datetime placeholder="Selecciona una fecha" type="datetime" v-model="dateHasta"></datetime>
+              <br>
+            </div>
+          </div>
+          <b-button class="btn btn-info avanzada" @click="busquedaAvanzadaMethod">{{textoAvanzada}}</b-button>
         </div>
       </div>
-      <br />
+      <br>
       <div class="row">
         <div class="col-10">
           <gmap-map :center="center" :zoom="13" style="width:100%;  height: 350px;">
@@ -46,27 +56,8 @@
               name="buttons-Categoria"
             ></b-form-checkbox-group>
           </b-form-group>
-
-          <div class="btn-group-vertical avanzada">
-            <b-button class="btn btn-info avanzada" @click="show">BUSQUEDA AVANZADA</b-button>
-          </div>
         </div>
       </div>
-      <modal name="hello-world">
-        <div class="container">
-          <h3>Busqueda Avanzada por Fecha</h3>
-          <div class="form-group">
-            <label>Desde</label>
-            <datetime placeholder="Selecciona una fecha" type="datetime" v-model="dateDesde"></datetime>
-          </div>
-          <div class="form-group">
-            <label>Hasta</label>
-            <datetime placeholder="Selecciona una fecha" type="datetime" v-model="dateHasta"></datetime>
-            <br />
-            <b-button class="btn btn-info avanzada" @click="buscarPorFechas">BUSQUEDA AVANZADA</b-button>
-          </div>
-        </div>
-      </modal>
     </div>
     <b-table striped hover :items="markers"></b-table>
   </div>
@@ -74,7 +65,7 @@
 
 
 <script>
-import axios from "axios"
+import axios from "axios";
 
 export default {
   data() {
@@ -83,6 +74,7 @@ export default {
       selectedCategoria: [],
       selectedFecha: [],
       busquedaAvanzada: false,
+      textoAvanzada: "BUSQUEDA AVANZADA",
       center: { lat: -34.59, lng: -58.45 },
       markers: [],
       options: [
@@ -97,33 +89,41 @@ export default {
         { text: "Todos", value: "99999" }
       ],
       todosLosEventos: null,
-      dateDesde:'',
-      dateHasta:''
+      dateDesde: "",
+      dateHasta: ""
     };
   },
   mounted() {
     this.geolocate();
 
     axios
-        .get("http://localhost:8080/api/eventos")
-        .then(response => {
-          console.log([
-        {
-          position: { lat: -34.5876635, lng: -58.45189970000001 },
-          categoria: "Partido Futbol",
-          fechaHora: "2019-11-11T10:20:30Z"
-        }
-      ])
-          console.log(response.data)
-          this.todosLosEventos = response.data;
-        })
-        .catch(e => {
-          // Podemos mostrar los errores en la consola
-          console.log(e);
-        });
-    },
+      .get("http://localhost:8080/api/eventos")
+      .then(response => {
+        console.log([
+          {
+            position: { lat: -34.5876635, lng: -58.45189970000001 },
+            categoria: "Partido Futbol",
+            fechaHora: "2019-11-11T10:20:30Z"
+          }
+        ]);
+        console.log(response.data);
+        this.todosLosEventos = response.data;
+      })
+      .catch(e => {
+        // Podemos mostrar los errores en la consola
+        console.log(e);
+      });
+  },
   methods: {
-    busquedaAvanzadaMethod: function() {},
+    busquedaAvanzadaMethod: function() {
+      if (this.busquedaAvanzada) {
+        this.busquedaAvanzada = false;
+        this.textoAvanzada = "BUSQUEDA AVANZADA";
+      } else {
+        this.busquedaAvanzada = true;
+        this.textoAvanzada = "BUSQUEDA SIMPLE";
+      }
+    },
     geolocate: function() {
       navigator.geolocation.getCurrentPosition(position => {
         this.center = {
@@ -152,8 +152,8 @@ export default {
           j = 0;
           i++;
         }
-      }else{
-        listaFiltrada=this.markers
+      } else {
+        listaFiltrada = this.markers;
       }
       return listaFiltrada;
     },
@@ -161,16 +161,17 @@ export default {
     actualizarMarkersPorFecha(fecha) {
       let i = 0;
       let lista = [];
-      if(this.selectedFecha.length!=0){
-
+      if (this.selectedFecha.length != 0) {
         while (i < this.todosLosEventos.length) {
-          if (this.cuantoDiasFaltan(this.todosLosEventos[i].fechaHora) <= fecha) {
+          if (
+            this.cuantoDiasFaltan(this.todosLosEventos[i].fechaHora) <= fecha
+          ) {
             lista.push(this.todosLosEventos[i]);
           }
           i++;
         }
-      }else{
-        lista=this.todosLosEventos
+      } else {
+        lista = this.todosLosEventos;
       }
       console.log(lista);
       return lista;
@@ -192,44 +193,44 @@ export default {
     hide() {
       this.$modal.hide("hello-world");
     },
-    buscarPorFechas(){
-      let i=0
-      let busquedaDesde=new Date(this.dateDesde)
-      let busquedaHasta=new Date(this.dateHasta)
-      let lista = []
-      while(i<this.todosLosEventos.length){
-        let fechaEvento=new Date(this.todosLosEventos[i].fechaHora)
-        if(fechaEvento>busquedaDesde && fechaEvento<busquedaHasta){
-          lista.push(this.todosLosEventos[i])
+    buscarPorFechas() {
+      let i = 0;
+      let busquedaDesde = new Date(this.dateDesde);
+      let busquedaHasta = new Date(this.dateHasta);
+      let lista = [];
+      while (i < this.todosLosEventos.length) {
+        let fechaEvento = new Date(this.todosLosEventos[i].fechaHora);
+        if (fechaEvento > busquedaDesde && fechaEvento < busquedaHasta) {
+          lista.push(this.todosLosEventos[i]);
         }
-        i++
+        i++;
       }
-      this.markers=lista;
-      this.hide()
+      this.markers = lista;
+      this.hide();
     }
   },
 
-  computed:{
-    filtrarMarcadores: function(){
+  computed: {
+    filtrarMarcadores: function() {
       //Digo que filtrados es igual a todos los eventos
-      let filtrados = this.todosLosEventos
+      let filtrados = this.todosLosEventos;
 
       //Chequeo si algun boton de arriba esta seleccionado, Filtro por fecha
-       if (this.selectedFecha.length!=0) {
+      if (this.selectedFecha.length != 0) {
         filtrados = filtrados.filter(
           m => this.cuantoDiasFaltan(m.fechaHora) <= this.selectedFecha
         );
       }
       //Chequeo si hay alguna categoria selecciona, Filtro por categoria
-      if(this.selectedCategoria.length!=0){
-        filtrados=filtrados.filter(
-          m=>this.selectedCategoria.indexOf(m.categoria) >=0
+      if (this.selectedCategoria.length != 0) {
+        filtrados = filtrados.filter(
+          m => this.selectedCategoria.indexOf(m.categoria) >= 0
         );
       }
-      return filtrados
+      return filtrados;
     }
   }
-/*
+  /*
   watch: {
     selected: function(val) {
       this.markers = this.actualizarMarkersPorFecha(this.selectedFecha);
