@@ -44,11 +44,14 @@
           </gmap-map>
         </div>
 
+       
+
         <div class="col-2">
           <b-form-group>
             <b-form-checkbox-group
               v-model="selectedCategoria"
               :options="options"
+              :icon="{ url: `/img/${options.value}icon.png`}"
               stacked
               buttons
               button-variant="btn btn-info ml-4"
@@ -60,8 +63,30 @@
       </div>
     </div>
     <b-table striped hover :items="markers"></b-table>
+
+<div>
+    <template>
+      <div class="container">
+        <b-table striped hover :items="filtrarMarcadores" :fields="fields">
+          <template v-slot:cell(asistir)="row">
+            <b-button size="sm" class="btn-info">Asistir</b-button>
+          </template>
+        </b-table>
+      </div>
+    </template>
   </div>
+
+
+  </div>
+
+
+
+
+
+  
 </template>
+
+ 
 
 
 <script>
@@ -71,12 +96,13 @@ export default {
       test: this.cuantoDiasFaltan("2019-11-11T10:20:30Z"),
       selectedCategoria: [],
       selectedFecha: [],
+      fields: ["direccion", "categoria", "fechaInicio", "Asistir"],
       busquedaAvanzada: false,
       textoAvanzada: "BUSQUEDA AVANZADA",
       center: { lat: -34.59, lng: -58.45 },
       markers: [],
       options: [
-        { text: "Magic", value: "Cartas Magic" },
+        { text: "Magic", value: "Cartas Magic"},
         { text: "Futbol", value: "Partido Futbol" },
         { text: "Mateada", value: "Mateada en la Plaza" }
       ],
@@ -145,8 +171,8 @@ export default {
     }
   },
 
-  computed: {
-    filtrarMarcadores: function() {
+  asyncComputed: {
+    filtrarMarcadores: async function() {
       //Digo que filtrados es igual a todos los eventos
       let filtrados = this.todosLosEventos;
 
@@ -166,7 +192,7 @@ export default {
       //Chequeo si esta activada la busqueda avanzada y cancelo todos los filtros anteriores
 
       if (this.dateDesde != "" && this.dateHasta != "") {
-        this.$http
+        await this.$http
           .get("http://localhost:8080/api/eventos", {
             params: {
               desde: this.formatearFecha(this.dateDesde),
@@ -178,6 +204,11 @@ export default {
             console.log(response.data)
             filtrados=[]
             filtrados=response.data
+             if (this.selectedCategoria.length != 0) {
+               filtrados = filtrados.filter(
+               m => this.selectedCategoria.indexOf(m.categoria) >= 0
+              );
+            }
           })
           .catch(e => {
             console.log(this.formatearFecha(this.dateDesde),this.formatearFecha(this.dateHasta))
