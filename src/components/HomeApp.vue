@@ -1,7 +1,27 @@
 <template>
   <div>
+    <div>
+      <modal name="modal-center">
+        <b-form-group label="DNI" label-for="dni" invalid-feedback="El DNI es un campo requerido">
+          <b-form-input id="dni" v-model="dni" required></b-form-input>
+          <b-button size="sm" class="btn-info" @click="login">Ingresar</b-button>
+          {{mensajeInvalido}}
+        </b-form-group>
+      </modal>
+      <div v-if="logueado">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">DNI: {{usrLogueado.dni}}</th>
+              <th scope="col">Mail: {{usrLogueado.mail}}</th>
+              <th scope="col">Telefono: 11{{usrLogueado.telefono}}</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+    </div>
     <div class="container">
-      <br />
+      <br>
       <div class="btn-space">
         <div class="row">
           <div class="col-6" v-if="!busquedaAvanzada">
@@ -30,7 +50,7 @@
           <b-button class="btn btn-info avanzada" @click="busquedaAvanzadaMethod">{{textoAvanzada}}</b-button>
         </div>
       </div>
-      <br />
+      <br>
       <div class="row">
         <div class="col-10">
           <gmap-map :center="center" :zoom="13" style="width:100%;  height: 350px;">
@@ -43,8 +63,6 @@
             ></gmap-marker>
           </gmap-map>
         </div>
-
-       
 
         <div class="col-2">
           <b-form-group>
@@ -64,26 +82,18 @@
     </div>
     <b-table striped hover :items="markers"></b-table>
 
-<div>
-    <template>
-      <div class="container">
-        <b-table striped hover :items="filtrarMarcadores" :fields="fields">
-          <template v-slot:cell(asistir)="row">
-            <b-button size="sm" class="btn-info">Asistir</b-button>
-          </template>
-        </b-table>
-      </div>
-    </template>
+    <div>
+      <template>
+        <div class="container">
+          <b-table striped hover :items="filtrarMarcadores" :fields="fields">
+            <template v-slot:cell(asistir)="row">
+              <b-button size="sm" class="btn-info">Asistir</b-button>
+            </template>
+          </b-table>
+        </div>
+      </template>
+    </div>
   </div>
-
-
-  </div>
-
-
-
-
-
-  
 </template>
 
  
@@ -96,13 +106,34 @@ export default {
       test: this.cuantoDiasFaltan("2019-11-11T10:20:30Z"),
       selectedCategoria: [],
       selectedFecha: [],
-      fields: ["direccion", "categoria", "fechaInicio", "Asistir"],
+      fields: ["direccion", "categoria", "fecha", "Asistir"],
       busquedaAvanzada: false,
+      modalShow: true,
+      dni: "",
+      logueado: false,
+      mensajeInvalido: "",
+      usrLogueado: {},
+      variants: [
+        "primary",
+        "secondary",
+        "success",
+        "warning",
+        "danger",
+        "info",
+        "light",
+        "dark"
+      ],
+      headerBgVariant: "dark",
+      headerTextVariant: "light",
+      bodyBgVariant: "light",
+      bodyTextVariant: "dark",
+      footerBgVariant: "warning",
+      footerTextVariant: "dark",
       textoAvanzada: "BUSQUEDA AVANZADA",
       center: { lat: -34.59, lng: -58.45 },
       markers: [],
       options: [
-        { text: "Magic", value: "Cartas Magic"},
+        { text: "Magic", value: "Cartas Magic" },
         { text: "Futbol", value: "Partido Futbol" },
         { text: "Mateada", value: "Mateada en la Plaza" }
       ],
@@ -114,10 +145,12 @@ export default {
       ],
       todosLosEventos: null,
       dateDesde: "",
-      dateHasta: ""
+      dateHasta: "",
+      listaBusquedaAvanzada:null
     };
   },
   mounted() {
+    this.show();
     this.geolocate();
 
     this.$http
@@ -130,16 +163,70 @@ export default {
         console.log(e);
       });
   },
+
+  watch: {
+    dateHasta: async function(val) {
+      if (this.dateDesde != "" && this.dateHasta != "") {
+        console.log("Entre al if del watch")
+        await this.$http
+          .get("http://localhost:8080/api/eventos", {
+            params: {
+              desde: this.formatearFecha(this.dateDesde),
+              hasta: this.formatearFecha(this.dateHasta)
+            }
+          })
+          .then(response => {
+            this.listaBusquedaAvanzada = response.data;
+          })
+          .catch(e => {
+            console.log(
+              this.formatearFecha(this.dateDesde),
+              this.formatearFecha(this.dateHasta)
+            );
+            // Podemos mostrar los errores en la consola
+            console.log(e);
+          });
+      }
+    }
+  },
+
   methods: {
+    login: async function() {
+      if (this.dni != null) {
+        await this.$http
+          .get("http://localhost:8080/api/usuarios/" + this.dni)
+          .then(response => {
+            if (response.status == 200) {
+              this.usrLogueado = response.data;
+              this.logueado = true;
+              this.hide();
+            } else {
+              this.mensajeInvalido = response.descripcion;
+            }
+          })
+          .catch(e => {
+            // Podemos mostrar los errores en la consola
+            console.log(e);
+          });
+      }
+    },
+    show() {
+      this.$modal.show("modal-center");
+    },
+    hide() {
+      this.$modal.hide("modal-center");
+    },
+
     busquedaAvanzadaMethod: function() {
       if (this.busquedaAvanzada) {
-        this.dateDesde="",
-        this.dateHasta="",
-        this.busquedaAvanzada = false;
+        (this.dateDesde = ""),
+          (this.dateHasta = ""),
+          (this.busquedaAvanzada = false);
         this.textoAvanzada = "BUSQUEDA AVANZADA";
       } else {
         this.busquedaAvanzada = true;
         this.textoAvanzada = "BUSQUEDA SIMPLE";
+        this.listaBusquedaAvanzada= null;
       }
     },
     geolocate: function() {
@@ -151,12 +238,11 @@ export default {
       });
     },
 
-    formatearFecha(fecha){
+    formatearFecha(fecha) {
+      let fechaFormateada = fecha.replace("Z", " ");
+      fechaFormateada = fechaFormateada.replace("T", " ");
 
-      let fechaFormateada=fecha.replace('Z',' ');
-      fechaFormateada=fechaFormateada.replace('T',' ');
-
-      return fechaFormateada
+      return fechaFormateada;
     },
 
     cuantoDiasFaltan(fechaString) {
@@ -171,10 +257,15 @@ export default {
     }
   },
 
-  asyncComputed: {
-    filtrarMarcadores: async function() {
+  computed: {
+    filtrarMarcadores: function() {
       //Digo que filtrados es igual a todos los eventos
       let filtrados = this.todosLosEventos;
+
+      if (this.listaBusquedaAvanzada != null) {
+
+        filtrados = this.listaBusquedaAvanzada
+      }
 
       //Chequeo si algun boton de arriba esta seleccionado, Filtro por fecha
       if (this.selectedFecha.length != 0) {
@@ -191,33 +282,8 @@ export default {
 
       //Chequeo si esta activada la busqueda avanzada y cancelo todos los filtros anteriores
 
-      if (this.dateDesde != "" && this.dateHasta != "") {
-        await this.$http
-          .get("http://localhost:8080/api/eventos", {
-            params: {
-              desde: this.formatearFecha(this.dateDesde),
-              hasta: this.formatearFecha(this.dateHasta)
-            } 
-          })
-          .then(response => {
-            
-            console.log(response.data)
-            filtrados=[]
-            filtrados=response.data
-             if (this.selectedCategoria.length != 0) {
-               filtrados = filtrados.filter(
-               m => this.selectedCategoria.indexOf(m.categoria) >= 0
-              );
-            }
-          })
-          .catch(e => {
-            console.log(this.formatearFecha(this.dateDesde),this.formatearFecha(this.dateHasta))
-            // Podemos mostrar los errores en la consola
-            console.log(e);
-          });
-      }
-      console.log(filtrados)
-      return filtrados
+      console.log(filtrados);
+      return filtrados;
     }
   }
 };
@@ -269,3 +335,5 @@ export default {
   }
 }
 </style>
+
+
