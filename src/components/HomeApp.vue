@@ -115,11 +115,26 @@
     <div>
       <template>
         <div class="container">
-          <b-table striped hover :items="filtrarMarcadores" :fields="fields">
-            <template v-slot:cell(asistir)="row">
-              <b-button size="sm" class="btn-info">Asistir</b-button>
-            </template>
-          </b-table>
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Direccion</th>
+                <th scope="col">Categoria</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Asistir</th>
+              </tr>
+            </thead>
+            <tbody v-for="item in filtrarMarcadores" :key="item.id">
+              <tr>
+                <td>{{item.direccion}}</td>
+                <td>{{item.categoria}}</td>
+                <td>{{item.fecha}}</td>
+                <td>
+                  <b-button @click="asistir(item.id)" class="btn btn-info" v-bind:class="[isActive ? activeClass : '', errorClass]">Asistir</b-button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </template>
     </div>
@@ -224,6 +239,19 @@ export default {
   },
 
   methods: {
+    asistir: function(id) {
+      this.$http
+        .post("http://localhost:8080/api/asistencias", {
+          idEvento: id,
+          dniUsuario: this.dni,
+        })
+        .then(response => {
+          
+        })
+        .catch(e => {
+          console.log(e);
+        });
+    },
     login: async function() {
       if (this.dni != null) {
         await this.$http
@@ -255,7 +283,7 @@ export default {
           password: this.password
         })
         .then(response => {
-          this.hideModalRegister()
+          this.hideModalRegister();
         })
         .catch(e => {
           console.log(e);
