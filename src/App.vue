@@ -17,7 +17,6 @@
         <div class="navbar-nav ml-auto">
           <router-link to="/HomeApp" class="nav-item nav-link" tag="a" v-if="logeado">Home</router-link>
 
-          <router-link to="/Register" class="nav-item nav-link" tag="a" v-if="logeado">Registrate</router-link>
           <router-link to="/" class="nav-item nav-link" tag="a" v-if="!logeado">Iniciar Sesion</router-link>
 
           <router-link
@@ -27,11 +26,11 @@
             v-if="logeado"
           >Crear Evento</router-link>
           <router-link
-            to="/ListaEventos"
+            to="/MisEventos"
             class="nav-item nav-link"
             tag="a"
             v-if="logeado"
-          >Lista de Eventos</router-link>
+          >Mis Eventos</router-link>
         </div>
       </div>
     </nav>

@@ -1,5 +1,41 @@
 <template>
   <div class="container">
+    <modal name="modal-login">
+      <b-form-group label="DNI" label-for="dni" invalid-feedback="El DNI es un campo requerido">
+        <b-form-input id="dni" v-model="dni" required></b-form-input>
+        <label>Contraseña</label>
+        <input v-model="password" type="password" class="form-control" />
+        <b-button size="sm" class="btn-info" @click="login">Ingresar</b-button>
+        {{mensajeInvalido}}
+      </b-form-group>No tenes usuario?
+      <a href="#" @click="mostrarModalRegistro">Registrate!</a>
+    </modal>
+
+    <modal name="modal-register">
+      <form>
+        <div class="form-group form-inline">
+          <label>Dni</label>
+          <input class="form-control" v-model="dni" />
+        </div>
+
+        <div class="form-group form-inline">
+          <label>Email</label>
+          <input class="form-control" v-model="email" />
+        </div>
+
+        <div class="form-group form-inline">
+          <label>Telefono</label>
+          <input class="form-control" v-model="telefono" />
+        </div>
+
+        <div class="form-group form-inline">
+          <label>Contraseña</label>
+          <input v-model="password" type="password" class="form-control" />
+        </div>
+
+        <b-button size="sm" class="btn-info" @click="registrate">Registrate</b-button>
+      </form>
+    </modal>
     <h1>Crear Evento</h1>
     <form>
       <div class="form-group">
@@ -62,7 +98,6 @@
 </template>
 
 <script>
-
 export default {
   name: "crearEvento",
   props: {},
@@ -73,43 +108,106 @@ export default {
       fecha: "",
       cantMax: 0,
       categoria: "",
-      dniCreador: "",
       duracion: "",
+      mensajeInvalido:"",
+      modalShow: true,
+      dni: "",
+      telefono: "",
+      email: "",
+      password: "",
       privado: false,
       currentPlace: null
     };
   },
+  mounted() {
+    this.showModalLogin();
+  },
   methods: {
+    login: async function() {
+      if (this.dni != null) {
+        await this.$http
+          .get("http://localhost:8080/api/usuarios/" + this.dni)
+          .then(response => {
+            if (
+              response.status == 200 &&
+              this.password == response.data.password
+            ) {
+              this.usrLogueado = response.data;
+              this.logueado = true;
+              this.hideModalLogin();
+            } else {
+              this.mensajeInvalido = response.descripcion;
+            }
+          })
+          .catch(e => {
+            // Podemos mostrar los errores en la consola
+            console.log(e);
+          });
+      }
+    },
+    registrate: function() {
+      this.$http
+        .post("http://localhost:8080/api/usuarios", {
+          dni: this.dni,
+          mail: this.email,
+          telefono: this.telefono,
+          password: this.password
+        })
+        .then(response => {
+          this.hideModalRegister();
+        })
+        .catch(e => {
+          console.log(e);
+        });
+    },
+    mostrarModalRegistro: function() {
+      this.showModalRegister();
+    },
+    showModalLogin() {
+      this.$modal.show("modal-login");
+    },
+    hideModalLogin() {
+      this.$modal.hide("modal-login");
+    },
+
+    showModalRegister() {
+      this.$modal.show("modal-register");
+    },
+    hideModalRegister() {
+      this.$modal.hide("modal-register");
+    },
+
     agregarEvento: function() {
       //bd.eventos.push(this.categoria,this.currentPlace.formatted_address,this.currentPlace.geometry.location,this.date)
-   
+
       this.$http
         .post("http://localhost:8080/api/eventos", {
-        titulo: this.titulo,
-        descripcion: this.descripcion,
-        fecha: this.fecha,
-        direccion: this.currentPlace.name,
-        latitud: this.currentPlace.geometry.location.lat(),
-        longitud: this.currentPlace.geometry.location.lng(),
-        cantMax: this.cantMax,
-        categoria: this.categoria,
-        dniCreador: Math.floor(Math.random() * (4000 - 50) + 50),
-        duracion: 24,
-        privado: this.privado
-        }).catch(e => {
-            console.log(e);
+          titulo: this.titulo,
+          descripcion: this.descripcion,
+          fecha: this.fecha,
+          direccion: this.currentPlace.name,
+          latitud: this.currentPlace.geometry.location.lat(),
+          longitud: this.currentPlace.geometry.location.lng(),
+          cantMax: this.cantMax,
+          categoria: this.categoria,
+          dniCreador: this.dni,
+          duracion: 24,
+          privado: this.privado
+        })
+        .catch(e => {
+          console.log(e);
         });
 
-      this.titulo= "",
-      this.descripcion= "",
-      this.fecha= "",
-      this.cantMax= 0,
-      this.categoria= "",
-      this.currentPlace.name="",
-      this.dniCreador= "",
-      this.duracion= "",
-      this.privado= false,
-      this.currentPlace= null
+      (this.titulo = ""),
+        (this.descripcion = ""),
+        (this.fecha = ""),
+        (this.cantMax = 0),
+        (this.categoria = ""),
+        (this.currentPlace.name = ""),
+        (this.dniCreador = ""),
+        (this.duracion = ""),
+        (this.privado = false),
+        (this.currentPlace = null);
     },
     setPlace(place) {
       this.currentPlace = place;

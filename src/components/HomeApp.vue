@@ -1,13 +1,43 @@
 <template>
   <div>
     <div>
-      <modal name="modal-center">
+      <modal name="modal-login">
         <b-form-group label="DNI" label-for="dni" invalid-feedback="El DNI es un campo requerido">
           <b-form-input id="dni" v-model="dni" required></b-form-input>
+          <label>Contraseña</label>
+          <input v-model="password" type="password" class="form-control" />
           <b-button size="sm" class="btn-info" @click="login">Ingresar</b-button>
           {{mensajeInvalido}}
-        </b-form-group>
+        </b-form-group>No tenes usuario?
+        <a href="#" @click="mostrarModalRegistro">Registrate!</a>
       </modal>
+
+      <modal name="modal-register">
+        <form>
+          <div class="form-group form-inline">
+            <label>Dni</label>
+            <input class="form-control" v-model="dni" />
+          </div>
+
+          <div class="form-group form-inline">
+            <label>Email</label>
+            <input class="form-control" v-model="email" />
+          </div>
+
+          <div class="form-group form-inline">
+            <label>Telefono</label>
+            <input class="form-control" v-model="telefono" />
+          </div>
+
+          <div class="form-group form-inline">
+            <label>Contraseña</label>
+            <input v-model="password" type="password" class="form-control" />
+          </div>
+
+          <b-button size="sm" class="btn-info" @click="registrate">Registrate</b-button>
+        </form>
+      </modal>
+
       <div v-if="logueado">
         <table class="table">
           <thead>
@@ -21,7 +51,7 @@
       </div>
     </div>
     <div class="container">
-      <br>
+      <br />
       <div class="btn-space">
         <div class="row">
           <div class="col-6" v-if="!busquedaAvanzada">
@@ -50,7 +80,7 @@
           <b-button class="btn btn-info avanzada" @click="busquedaAvanzadaMethod">{{textoAvanzada}}</b-button>
         </div>
       </div>
-      <br>
+      <br />
       <div class="row">
         <div class="col-10">
           <gmap-map :center="center" :zoom="13" style="width:100%;  height: 350px;">
@@ -110,6 +140,9 @@ export default {
       busquedaAvanzada: false,
       modalShow: true,
       dni: "",
+      telefono: "",
+      email: "",
+      password: "",
       logueado: false,
       mensajeInvalido: "",
       usrLogueado: {},
@@ -146,11 +179,11 @@ export default {
       todosLosEventos: null,
       dateDesde: "",
       dateHasta: "",
-      listaBusquedaAvanzada:null
+      listaBusquedaAvanzada: null
     };
   },
   mounted() {
-    this.show();
+    this.showModalLogin();
     this.geolocate();
 
     this.$http
@@ -167,7 +200,7 @@ export default {
   watch: {
     dateHasta: async function(val) {
       if (this.dateDesde != "" && this.dateHasta != "") {
-        console.log("Entre al if del watch")
+        console.log("Entre al if del watch");
         await this.$http
           .get("http://localhost:8080/api/eventos", {
             params: {
@@ -196,10 +229,13 @@ export default {
         await this.$http
           .get("http://localhost:8080/api/usuarios/" + this.dni)
           .then(response => {
-            if (response.status == 200) {
+            if (
+              response.status == 200 &&
+              this.password == response.data.password
+            ) {
               this.usrLogueado = response.data;
               this.logueado = true;
-              this.hide();
+              this.hideModalLogin();
             } else {
               this.mensajeInvalido = response.descripcion;
             }
@@ -210,11 +246,36 @@ export default {
           });
       }
     },
-    show() {
-      this.$modal.show("modal-center");
+    registrate: function() {
+      this.$http
+        .post("http://localhost:8080/api/usuarios", {
+          dni: this.dni,
+          mail: this.email,
+          telefono: this.telefono,
+          password: this.password
+        })
+        .then(response => {
+          this.hideModalRegister()
+        })
+        .catch(e => {
+          console.log(e);
+        });
     },
-    hide() {
-      this.$modal.hide("modal-center");
+    mostrarModalRegistro: function() {
+      this.showModalRegister();
+    },
+    showModalLogin() {
+      this.$modal.show("modal-login");
+    },
+    hideModalLogin() {
+      this.$modal.hide("modal-login");
+    },
+
+    showModalRegister() {
+      this.$modal.show("modal-register");
+    },
+    hideModalRegister() {
+      this.$modal.hide("modal-register");
     },
 
     busquedaAvanzadaMethod: function() {
@@ -226,7 +287,7 @@ export default {
       } else {
         this.busquedaAvanzada = true;
         this.textoAvanzada = "BUSQUEDA SIMPLE";
-        this.listaBusquedaAvanzada= null;
+        this.listaBusquedaAvanzada = null;
       }
     },
     geolocate: function() {
@@ -263,8 +324,7 @@ export default {
       let filtrados = this.todosLosEventos;
 
       if (this.listaBusquedaAvanzada != null) {
-
-        filtrados = this.listaBusquedaAvanzada
+        filtrados = this.listaBusquedaAvanzada;
       }
 
       //Chequeo si algun boton de arriba esta seleccionado, Filtro por fecha
