@@ -114,6 +114,7 @@
           <table class="table">
             <thead>
               <tr>
+                <th scope="col">ID</th>
                 <th scope="col">Direccion</th>
                 <th scope="col">Categoria</th>
                 <th scope="col">Fecha</th>
@@ -122,6 +123,7 @@
             </thead>
             <tbody v-for="item in filtrarMarcadores" :key="item.id">
               <tr>
+                <td>{{item.id}}</td>
                 <td>{{item.direccion}}</td>
                 <td>{{item.categoria}}</td>
                 <td>{{item.fecha}}</td>

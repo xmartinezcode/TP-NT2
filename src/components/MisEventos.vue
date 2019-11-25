@@ -6,6 +6,8 @@
         <table class="table">
           <thead>
             <tr>
+              
+              <th scope="col">ID</th>
               <th scope="col">Direccion</th>
               <th scope="col">Categoria</th>
               <th scope="col">Fecha</th>
@@ -15,6 +17,7 @@
           <tbody v-for="item in eventosAsistidos" :key="item.id">
             <tr>
 
+              <td>{{item.id}}</td>
               <td>{{item.direccion}}</td>
               <td>{{item.categoria}}</td>
               <td>{{item.fecha}}</td>
@@ -28,6 +31,8 @@
         <table class="table">
           <thead>
             <tr>
+
+              <th scope="col">ID</th>
               <th scope="col">Direccion</th>
               <th scope="col">Categoria</th>
               <th scope="col">Fecha</th>
@@ -35,8 +40,9 @@
             </tr>
           </thead>
           <tbody v-for="item in eventosCreados" :key="item.id">
-            <tr>
+            <tr>    
 
+              <td>{{item.id}}</td>
               <td>{{item.direccion}}</td>
               <td>{{item.categoria}}</td>
               <td>{{item.fecha}}</td>
@@ -127,13 +133,15 @@
             this.asistenciasUsuario = response.data.filter(
               m => m.dniUsuario == this.dni
             );
-
+            let eventoAux
             this.asistenciasUsuario.forEach(element => {
-              this.eventosAsistidos = this.todosLosEventos.filter(
+              eventoAux = this.todosLosEventos.filter(
                 m => m.id == element.idEvento
               );
+              this.eventosAsistidos.push(eventoAux[0])
             });
-
+            console.log(this.asistenciasUsuario)
+             console.log(this.eventosAsistidos)
           })
           .catch(e => {
             // Podemos mostrar los errores en la consola
