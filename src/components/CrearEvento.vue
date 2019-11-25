@@ -1,40 +1,36 @@
 <template>
   <div class="container">
-    <modal name="modal-login">
-      <b-form-group label="DNI" label-for="dni" invalid-feedback="El DNI es un campo requerido">
-        <b-form-input id="dni" v-model="dni" required></b-form-input>
-        <label>Contraseña</label>
-        <input v-model="password" type="password" class="form-control" />
-        <b-button size="sm" class="btn-info" @click="login">Ingresar</b-button>
-        {{mensajeInvalido}}
-      </b-form-group>No tenes usuario?
-      <a href="#" @click="mostrarModalRegistro">Registrate!</a>
+    <modal name="modal-login" class="bg-light">
+      <div class="p-4 mb-2 bg-dark text-white">
+        <h3>Log In</h3>
+        <b-form-group label="DNI" label-for="dni" invalid-feedback="El DNI es un campo requerido">
+          <b-form-input class="col-md-8" id="dni" v-model="dni" required></b-form-input>
+          <label class="mt-2">Contraseña</label>
+          <input v-model="password" type="password" class="form-control col-md-8" />
+          <b-button size="sm" class="btn-info mt-3" @click="login">Ingresar</b-button>
+          {{mensajeInvalido}}
+        </b-form-group>No tenes usuario?
+        <a href="#" @click="mostrarModalRegistro">Registrate!</a>
+      </div>
     </modal>
 
-    <modal name="modal-register">
-      <form>
-        <div class="form-group form-inline">
-          <label>Dni</label>
-          <input class="form-control" v-model="dni" />
-        </div>
-
-        <div class="form-group form-inline">
+    <modal name="modal-register" class="bg-light">
+      <div id="overflow" class="p-4 mb-2 bg-dark text-white">
+        <h3>Ingresa Tus Datos</h3>
+        <form>
+          <label>DNI</label>
+          <input class="form-control col-md-8" v-model="dni" />
           <label>Email</label>
-          <input class="form-control" v-model="email" />
-        </div>
-
-        <div class="form-group form-inline">
+          <input class="form-control col-md-8" v-model="email" />
           <label>Telefono</label>
-          <input class="form-control" v-model="telefono" />
-        </div>
-
-        <div class="form-group form-inline">
+          <input class="form-control col-md-8" v-model="telefono" />
           <label>Contraseña</label>
-          <input v-model="password" type="password" class="form-control" />
-        </div>
-
-        <b-button size="sm" class="btn-info" @click="registrate">Registrate</b-button>
-      </form>
+          <input class="form-control col-md-8" v-model="password" type="password" />
+          <br />
+          <b-button size="sm" class="btn-info mt-3" @click="registrate">Registrate!</b-button>
+          <b-button size="sm" class="btn-info mt-3 float-right" @click="volver">Volver</b-button>
+        </form>
+      </div>
     </modal>
     <h1>Crear Evento</h1>
     <form>
@@ -109,7 +105,7 @@ export default {
       cantMax: 0,
       categoria: "",
       duracion: "",
-      mensajeInvalido:"",
+      mensajeInvalido: "",
       modalShow: true,
       dni: "",
       telefono: "",
@@ -145,6 +141,10 @@ export default {
           });
       }
     },
+    volver: function() {
+      this.hideModalRegister();
+      this.$modal.show("modal-login");
+    },
     registrate: function() {
       this.$http
         .post("http://localhost:8080/api/usuarios", {
@@ -155,12 +155,14 @@ export default {
         })
         .then(response => {
           this.hideModalRegister();
+          this.$modal.show("modal-login");
         })
         .catch(e => {
           console.log(e);
         });
     },
     mostrarModalRegistro: function() {
+      this.$modal.hide("modal-login");
       this.showModalRegister();
     },
     showModalLogin() {
@@ -221,5 +223,12 @@ export default {
 .container {
   width: 75%;
   margin-top: 20px;
+}
+
+#overflow {
+  border: 1px solid blue;
+  width: 100%;
+  overflow-y: auto;
+  height: 100%;
 }
 </style>
