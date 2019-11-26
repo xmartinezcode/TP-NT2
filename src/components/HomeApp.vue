@@ -126,18 +126,18 @@
                 <td>{{item.id}}</td>
                 <td>{{item.direccion}}</td>
                 <td>{{item.categoria}}</td>
-                <td>{{item.fecha}}</td>
-                <td>
-                  <b-button
-                    @click="asistir(item.id)"
-                    class="btn btn-info"
-                    v-bind:class="[isActive ? activeClass : '', errorClass]"
-                  >Asistir</b-button>
+                <td>{{formatearFecha(item.fecha)}}</td>
+                <td v-if="!siUsuarioAsiste(item.id)">
+                  <b-button @click="asistir(item.id)" class="btn-info">Asistir</b-button>
+                </td>
+                <td v-else>
+                  <b-button @click="asistir(item.id)" disabled>Asistido</b-button>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
+        
       </template>
     </div>
   </div>
@@ -196,7 +196,10 @@ export default {
       todosLosEventos: null,
       dateDesde: "",
       dateHasta: "",
-      listaBusquedaAvanzada: null
+      listaBusquedaAvanzada: null,
+      eventosAsistidos: [],
+      activeClass: "btn-warning disabled",
+      defaultClass: "btn-info"
     };
   },
   mounted() {
@@ -215,7 +218,7 @@ export default {
   },
 
   watch: {
-    dateHasta: async function(val) {
+    dateHasta: async function() {
       if (this.dateDesde != "" && this.dateHasta != "") {
         console.log("Entre al if del watch");
         await this.$http
@@ -251,6 +254,7 @@ export default {
         .catch(e => {
           console.log(e);
         });
+        this.getEventosAsistidos()
     },
     login: async function() {
       if (this.dni != null) {
@@ -264,6 +268,7 @@ export default {
               this.usrLogueado = response.data;
               this.logueado = true;
               this.hideModalLogin();
+              this.getEventosAsistidos();
             } else {
               this.mensajeInvalido = response.descripcion;
             }
@@ -349,6 +354,44 @@ export default {
       let one_day = 1000 * 60 * 60 * 24;
 
       return Math.ceil((fechaDate.getTime() - hoy.getTime()) / one_day);
+    },
+
+    getEventosAsistidos: async function() {
+      await this.$http
+        .get("http://localhost:8080/api/asistencias")
+        .then(response => {
+          let asistenciasUsuario = response.data.filter(
+            m => m.dniUsuario == this.dni
+          );
+          let eventoAux;
+          asistenciasUsuario.forEach(element => {
+            eventoAux = this.todosLosEventos.filter(
+              m => m.id == element.idEvento
+            );
+            this.eventosAsistidos.push(eventoAux[0]);
+          });
+          console.log(this.asistenciasUsuario);
+          console.log(this.eventosAsistidos);
+        })
+        .catch(e => {
+          // Podemos mostrar los errores en la consola
+          console.log(e);
+        });
+    },
+
+    siUsuarioAsiste: function(id) {
+      let contiene = false;
+      let i = 0;
+
+      while (i < this.eventosAsistidos.length && !contiene) {
+        if (this.eventosAsistidos[i].id == id) {
+          contiene = true;
+        } else {
+          i++;
+        }
+      }
+
+      return contiene;
     }
   },
 

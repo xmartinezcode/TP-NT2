@@ -3,8 +3,6 @@ import MisEventos from './components/MisEventos.vue';
 import Home from './components/Home.vue';
 import HomeApp from './components/HomeApp.vue';
 import Login from './components/Login.vue';
-import Mapa from './components/Mapa.vue';
-import BusquedaAvanzada from './components/BusquedaAvanzada.vue';
 import Register  from './components/Register.vue';
 
 
@@ -15,13 +13,5 @@ export const routes = [
     {path:'/Register',name:'Register',component:Register},
     {path:'/MisEventos',name:'MisEventos',component:MisEventos},
     {path:'/Login',name:'Login',component:Login},
-    {path:'/BusquedaAvanzada',name:'BusquedaAvanzada',component:BusquedaAvanzada,
-    children:[
-        {path:'',name:'Mapa',component:Mapa},
-    ]},
-    {path:'/HomeApp',name:'HomeApp',component:HomeApp,
-        children:[
-            {path:'',name:'Mapa',component:Mapa},
-        ]
-    }
+    {path:'/HomeApp',name:'HomeApp',component:HomeApp    }
 ]
