@@ -250,11 +250,11 @@ export default {
           idEvento: id,
           dniUsuario: this.dni
         })
-        .then(response => {})
+        .then(response => {this.getEventosAsistidos()})
         .catch(e => {
           console.log(e);
         });
-        this.getEventosAsistidos()
+        
     },
     login: async function() {
       if (this.dni != null) {
