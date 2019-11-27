@@ -210,6 +210,11 @@ export default {
       .get("http://localhost:8080/api/eventos")
       .then(response => {
         this.todosLosEventos = response.data;
+        this.todosLosEventos.sort(function(a,b){
+        var dateA = new Date(a.fecha).getTime();
+        var dateB = new Date(b.fecha).getTime();
+        return dateA > dateB ? 1 : -1;  
+        });
       })
       .catch(e => {
         // Podemos mostrar los errores en la consola
