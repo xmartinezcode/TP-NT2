@@ -159,10 +159,8 @@
 export default {
   data() {
     return {
-      test: this.cuantoDiasFaltan("2019-11-11T10:20:30Z"),
       selectedCategoria: [],
       selectedFecha: [],
-      fields: ["direccion", "categoria", "fecha", "Asistir"],
       busquedaAvanzada: false,
       modalShow: true,
       dni: null,
@@ -172,22 +170,6 @@ export default {
       logueado: false,
       mensajeError: null,
       usrLogueado: {},
-      variants: [
-        "primary",
-        "secondary",
-        "success",
-        "warning",
-        "danger",
-        "info",
-        "light",
-        "dark"
-      ],
-      headerBgVariant: "dark",
-      headerTextVariant: "light",
-      bodyBgVariant: "light",
-      bodyTextVariant: "dark",
-      footerBgVariant: "warning",
-      footerTextVariant: "dark",
       textoAvanzada: "BUSQUEDA AVANZADA",
       center: { lat: -34.59, lng: -58.45 },
       markers: [],
@@ -207,8 +189,6 @@ export default {
       dateHasta: "",
       listaBusquedaAvanzada: null,
       eventosAsistidos: [],
-      activeClass: "btn-warning disabled",
-      defaultClass: "btn-info"
     };
   },
   mounted() {
@@ -271,6 +251,7 @@ export default {
         })
         .then(response => {
           this.getEventosAsistidos();
+          console.log(response)
         })
         .catch(e => {
           console.log(e);
@@ -322,6 +303,7 @@ export default {
         .then(response => {
           this.hideModalRegister();
           this.$modal.show("modal-login");
+          console.log(response)
         })
         .catch(e => {
           console.log(e);

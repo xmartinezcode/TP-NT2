@@ -8,10 +8,8 @@ import VueResource from 'vue-resource'
 import BootstrapVue from 'bootstrap-vue'
 import VModal from 'vue-js-modal'
 import Axios from 'axios'
-import AsyncComputed from 'vue-async-computed'
 
 Vue.prototype.$http = Axios;
-Vue.use(AsyncComputed)
 Vue.use(VModal)
 Vue.use(VueResource)
 Vue.use(BootstrapVue)

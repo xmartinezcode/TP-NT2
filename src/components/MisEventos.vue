@@ -221,6 +221,7 @@ export default {
           this.hideModalRegister();
           this.$modal.show("modal-login");
           this.mensajeError = null;
+          console.log(response)
         })
         .catch(e => {
           switch (e.status) {
