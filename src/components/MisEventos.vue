@@ -20,6 +20,7 @@
               <th scope="col">ID</th>
               <th scope="col">Direccion</th>
               <th scope="col">Categoria</th>
+              <th scope="col"></th>
               <th scope="col">Fecha</th>
             </tr>
           </thead>
@@ -28,6 +29,7 @@
               <td>{{item.id}}</td>
               <td>{{item.direccion}}</td>
               <td>{{item.categoria}}</td>
+              <td><img :src="`/img/${item.categoria}icon.png`" width="30px" height="30px" /></td>
               <td>{{formatearFecha(item.fecha)}}</td>
             </tr>
           </tbody>
@@ -41,6 +43,7 @@
               <th scope="col">ID</th>
               <th scope="col">Direccion</th>
               <th scope="col">Categoria</th>
+              <th scope="col"></th>
               <th scope="col">Fecha</th>
             </tr>
           </thead>
@@ -49,6 +52,7 @@
               <td>{{item.id}}</td>
               <td>{{item.direccion}}</td>
               <td>{{item.categoria}}</td>
+              <td><img :src="`/img/${item.categoria}icon.png`" width="30px" height="30px" /></td>
               <td>{{formatearFecha(item.fecha)}}</td>
             </tr>
           </tbody>

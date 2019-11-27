@@ -88,8 +88,13 @@
               v-for="(m, index) in filtrarMarcadores"
               :position="{lat:m.latitud, lng:m.longitud}"
               :icon="{ url: `/img/${m.categoria}icon.png`}"
-              @click="center=m.position"
+              @click="center={lat:m.latitud, lng:m.longitud}"
+              
             ></gmap-marker>
+
+
+
+            
           </gmap-map>
         </div>
 
@@ -120,6 +125,7 @@
                 <th scope="col">ID</th>
                 <th scope="col">Direccion</th>
                 <th scope="col">Categoria</th>
+                <th></th>
                 <th scope="col">Fecha</th>
                 <th scope="col">Asistir</th>
               </tr>
@@ -129,6 +135,7 @@
                 <td>{{item.id}}</td>
                 <td>{{item.direccion}}</td>
                 <td>{{item.categoria}}</td>
+                <td><img :src="`/img/${item.categoria}icon.png`" width="30px" height="30px" /></td>
                 <td>{{formatearFecha(item.fecha)}}</td>
                 <td v-if="!siUsuarioAsiste(item.id)">
                   <b-button @click="asistir(item.id)" class="btn-info">Asistir</b-button>
