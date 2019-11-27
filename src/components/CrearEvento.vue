@@ -1,25 +1,25 @@
 <template>
   <div class="container">
-    <modal name="modal-login" class="bg-light">
-      <div class="p-4 mb-2 bg-dark text-white">
-        <h3>Log In</h3>
-        <b-form-group label="DNI" label-for="dni" invalid-feedback="El DNI es un campo requerido">
-          <b-form-input class="col-md-8" id="dni" v-model="dni" required></b-form-input>
-          <label class="mt-2">Contraseña</label>
-          <input v-model="password" type="password" class="form-control col-md-8" />
-          <b-button size="sm" class="btn-info mt-3" @click="login">Ingresar</b-button>
-          {{mensajeInvalido}}
-        </b-form-group>No tenes usuario?
-        <a href="#" @click="mostrarModalRegistro">Registrate!</a>
-      </div>
-    </modal>
+    <modal name="modal-login" :clickToClose="false" class="bg-light">
+        <div class="p-4 mb-2 bg-dark text-white">
+          <h3>Log In</h3>
+          <b-form-group label="DNI" label-for="dni" invalid-feedback="El DNI es un campo requerido">
+            <b-form-input class="col-md-8" id="dni" v-model="dni" required></b-form-input>
+            <label class="mt-2">Contraseña</label>
+            <input v-model="password" type="password" class="form-control col-md-8" />
+            <b-button size="sm" class="btn-info mt-3" @click="login">Ingresar</b-button>
+            <span class="text-danger" v-if="mensajeError">{{mensajeError}}</span>
+          </b-form-group>No tenes usuario?
+          <a href="#" @click="mostrarModalRegistro">Registrate!</a>
+        </div>
+      </modal>
 
-    <modal name="modal-register" class="bg-light">
+    <modal name="modal-register" :clickToClose="false" class="bg-light">
       <div id="overflow" class="p-4 mb-2 bg-dark text-white">
         <h3>Ingresa Tus Datos</h3>
         <form>
           <label>DNI</label>
-          <input class="form-control col-md-8" v-model="dni" />
+          <input class="form-control col-md-8" v-model="dni" required />
           <label>Email</label>
           <input class="form-control col-md-8" v-model="email" />
           <label>Telefono</label>
@@ -27,11 +27,26 @@
           <label>Contraseña</label>
           <input class="form-control col-md-8" v-model="password" type="password" />
           <br />
+          
+            <div class="text-danger" v-if="mensajeError">{{mensajeError}}</div>
           <b-button size="sm" class="btn-info mt-3" @click="registrate">Registrate!</b-button>
           <b-button size="sm" class="btn-info mt-3 float-right" @click="volver">Volver</b-button>
         </form>
       </div>
     </modal>
+  <div v-if="logueado">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">DNI: {{usrLogueado.dni}}</th>
+              <th scope="col">Mail: {{usrLogueado.mail}}</th>
+              <th scope="col">Telefono: 11{{usrLogueado.telefono}}</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+
+
     <h1>Crear Evento</h1>
     <form>
       <div class="form-group">
@@ -88,6 +103,7 @@
         <label class="form-check-label" for="defaultCheck1">Privado</label>
       </div>
 
+            <div class="text-danger" v-if="mensajeError&&logueado">{{mensajeError}}</div>
       <input type="button" value="Crear" class="btn btn-success" v-on:click="agregarEvento" />
     </form>
   </div>
@@ -95,8 +111,6 @@
 
 <script>
 export default {
-  name: "crearEvento",
-  props: {},
   data: function() {
     return {
       titulo: "",
@@ -105,9 +119,10 @@ export default {
       cantMax: 0,
       categoria: "",
       duracion: "",
-      mensajeInvalido: "",
+      mensajeError: null,
+      logueado: false,
       modalShow: true,
-      dni: "",
+      dni: null,
       telefono: "",
       email: "",
       password: "",
@@ -118,27 +133,34 @@ export default {
   mounted() {
     this.showModalLogin();
   },
-  methods: {
-    login: async function() {
-      if (this.dni != null) {
+  methods: {login: async function() {
+      if (this.dni != null && this.dni !="") {
         await this.$http
           .get("http://localhost:8080/api/usuarios/" + this.dni)
           .then(response => {
-            if (
-              response.status == 200 &&
-              this.password == response.data.password
-            ) {
-              this.usrLogueado = response.data;
-              this.logueado = true;
-              this.hideModalLogin();
-            } else {
-              this.mensajeInvalido = response.descripcion;
+            if (response.status == 200) {
+              if (this.password == response.data.password) {
+                this.usrLogueado = response.data;
+                this.logueado = true;
+                this.hideModalLogin();
+                this.mensajeError = null;
+              } else {
+                this.mensajeError = "La contraseña es invalida";
+              }
             }
           })
           .catch(e => {
-            // Podemos mostrar los errores en la consola
-            console.log(e);
+            switch (e.status) {
+              case 404:
+                this.mensajeError = "Usuario no encontrado";
+                break;
+
+              default:
+                break;
+            }
           });
+      } else {
+        this.mensajeError = "Ingresa un usuario";
       }
     },
     volver: function() {
@@ -156,9 +178,17 @@ export default {
         .then(response => {
           this.hideModalRegister();
           this.$modal.show("modal-login");
+          this.mensajeError=null;
         })
         .catch(e => {
-          console.log(e);
+          switch (e.status) {
+            case 400:
+              this.mensajeError= "Formato invalido o faltan datos"
+              break;
+          
+            default:
+              break;
+          }
         });
     },
     mostrarModalRegistro: function() {
@@ -197,7 +227,14 @@ export default {
           privado: this.privado
         })
         .catch(e => {
-          console.log(e);
+          switch (e.status) {
+            case 400:
+              this.mensajeError= "Formato invalido o faltan datos"
+              break;
+          
+            default:
+              break;
+          }
         });
 
       (this.titulo = ""),

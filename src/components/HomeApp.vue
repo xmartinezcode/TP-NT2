@@ -1,26 +1,27 @@
 <template>
   <div>
     <div>
-      <modal name="modal-login" class="bg-light">
+      <modal name="modal-login" :clickToClose="false" class="bg-light">
         <div class="p-4 mb-2 bg-dark text-white">
           <h3>Log In</h3>
           <b-form-group label="DNI" label-for="dni" invalid-feedback="El DNI es un campo requerido">
             <b-form-input class="col-md-8" id="dni" v-model="dni" required></b-form-input>
             <label class="mt-2">Contraseña</label>
             <input v-model="password" type="password" class="form-control col-md-8" />
+
             <b-button size="sm" class="btn-info mt-3" @click="login">Ingresar</b-button>
-            {{mensajeInvalido}}
+            <span class="text-danger" v-if="mensajeError">{{mensajeError}}</span>
           </b-form-group>No tenes usuario?
           <a href="#" @click="mostrarModalRegistro">Registrate!</a>
         </div>
       </modal>
 
-      <modal name="modal-register" class="bg-light">
+      <modal name="modal-register" :clickToClose="false" class="bg-light">
         <div id="overflow" class="p-4 mb-2 bg-dark text-white">
           <h3>Ingresa Tus Datos</h3>
           <form>
             <label>DNI</label>
-            <input class="form-control col-md-8" v-model="dni" />
+            <input class="form-control col-md-8" v-model="dni" required />
             <label>Email</label>
             <input class="form-control col-md-8" v-model="email" />
             <label>Telefono</label>
@@ -28,6 +29,8 @@
             <label>Contraseña</label>
             <input class="form-control col-md-8" v-model="password" type="password" />
             <br />
+
+            <div class="text-danger" v-if="mensajeError">{{mensajeError}}</div>
             <b-button size="sm" class="btn-info mt-3" @click="registrate">Registrate!</b-button>
             <b-button size="sm" class="btn-info mt-3 float-right" @click="volver">Volver</b-button>
           </form>
@@ -137,7 +140,6 @@
             </tbody>
           </table>
         </div>
-        
       </template>
     </div>
   </div>
@@ -156,12 +158,12 @@ export default {
       fields: ["direccion", "categoria", "fecha", "Asistir"],
       busquedaAvanzada: false,
       modalShow: true,
-      dni: "",
+      dni: null,
       telefono: "",
       email: "",
       password: "",
       logueado: false,
-      mensajeInvalido: "",
+      mensajeError: null,
       usrLogueado: {},
       variants: [
         "primary",
@@ -210,10 +212,10 @@ export default {
       .get("http://localhost:8080/api/eventos")
       .then(response => {
         this.todosLosEventos = response.data;
-        this.todosLosEventos.sort(function(a,b){
-        var dateA = new Date(a.fecha).getTime();
-        var dateB = new Date(b.fecha).getTime();
-        return dateA > dateB ? 1 : -1;  
+        this.todosLosEventos.sort(function(a, b) {
+          var dateA = new Date(a.fecha).getTime();
+          var dateB = new Date(b.fecha).getTime();
+          return dateA > dateB ? 1 : -1;
         });
       })
       .catch(e => {
@@ -235,6 +237,11 @@ export default {
           })
           .then(response => {
             this.listaBusquedaAvanzada = response.data;
+            this.listaBusquedaAvanzada.sort(function(a, b) {
+              var dateA = new Date(a.fecha).getTime();
+              var dateB = new Date(b.fecha).getTime();
+              return dateA > dateB ? 1 : -1;
+            });
           })
           .catch(e => {
             console.log(
@@ -255,33 +262,42 @@ export default {
           idEvento: id,
           dniUsuario: this.dni
         })
-        .then(response => {this.getEventosAsistidos()})
+        .then(response => {
+          this.getEventosAsistidos();
+        })
         .catch(e => {
           console.log(e);
         });
-        
     },
     login: async function() {
-      if (this.dni != null) {
+      if (this.dni != null && this.dni != "") {
         await this.$http
           .get("http://localhost:8080/api/usuarios/" + this.dni)
           .then(response => {
-            if (
-              response.status == 200 &&
-              this.password == response.data.password
-            ) {
-              this.usrLogueado = response.data;
-              this.logueado = true;
-              this.hideModalLogin();
-              this.getEventosAsistidos();
-            } else {
-              this.mensajeInvalido = response.descripcion;
+            if (response.status == 200) {
+              if (this.password == response.data.password) {
+                this.usrLogueado = response.data;
+                this.logueado = true;
+                this.hideModalLogin();
+                this.getEventosAsistidos();
+                this.mensajeError = null;
+              } else {
+                this.mensajeError = "La contraseña es invalida";
+              }
             }
           })
           .catch(e => {
-            // Podemos mostrar los errores en la consola
-            console.log(e);
+            switch (e.status) {
+              case 404:
+                this.mensajeError = "Usuario no encontrado";
+                break;
+
+              default:
+                break;
+            }
           });
+      } else {
+        this.mensajeError = "Ingresa un usuario";
       }
     },
     volver: function() {
@@ -324,11 +340,14 @@ export default {
 
     busquedaAvanzadaMethod: function() {
       if (this.busquedaAvanzada) {
-        (this.dateDesde = ""),
-          (this.dateHasta = ""),
-          (this.busquedaAvanzada = false);
+        this.dateDesde = "";
+        this.dateHasta = "";
+        this.busquedaAvanzada = false;
         this.textoAvanzada = "BUSQUEDA AVANZADA";
+        this.listaBusquedaAvanzada = this.todosLosEventos;
       } else {
+        this.dateDesde = "";
+        this.dateHasta = "";
         this.busquedaAvanzada = true;
         this.textoAvanzada = "BUSQUEDA SIMPLE";
         this.listaBusquedaAvanzada = null;
@@ -346,7 +365,7 @@ export default {
     formatearFecha(fecha) {
       let fechaFormateada = fecha.replace("Z", " ");
       fechaFormateada = fechaFormateada.replace("T", " ");
-
+      fechaFormateada = fechaFormateada.replace(":00.000", " ");
       return fechaFormateada;
     },
 

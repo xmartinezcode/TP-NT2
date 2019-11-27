@@ -4,7 +4,7 @@
       <img src="../assets/gente.jpg">    
         <div class="centered">
           <h1>Encontra eventos en base a tus gustos o crealos</h1>
-          <router-link to="/Login" class="btn btn-primary btn-lg" tag="button">Unite</router-link>
+          <router-link to="/HomeApp" class="btn btn-primary btn-lg" tag="button">Unite</router-link>
         </div>     
         
     </div>
